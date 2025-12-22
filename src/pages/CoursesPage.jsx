@@ -68,7 +68,7 @@ const CoursesPage = () => {
     setLoading(true);
 
     axios
-      .get("http://localhost:2000/api/courses")
+      .get(`${import.meta.env.VITE_API_URL}/api/courses`)
       .then((res) => {
         setCourses(res.data);
         setLoading(false);
