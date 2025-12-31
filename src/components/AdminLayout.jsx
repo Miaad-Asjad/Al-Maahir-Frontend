@@ -286,15 +286,11 @@ import axios from "axios";
 import { io as clientIo } from "socket.io-client";
 import { Bell, Mail, Menu } from "lucide-react";
 
-/* ======================================================
-   AXIOS GLOBAL CONFIG (🔥 IMPORTANT FIX)
-====================================================== */
-axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-axios.defaults.withCredentials = true;
 
-/* ======================================================
-   NOTIFICATION CONTEXT
-====================================================== */
+
+
+  //  NOTIFICATION CONTEXT
+
 const NotificationContext = createContext();
 export function useNotifications() {
   return useContext(NotificationContext);
