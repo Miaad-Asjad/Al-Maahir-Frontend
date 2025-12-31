@@ -21,7 +21,8 @@ export function useNotifications() {
   return useContext(NotificationContext);
 }
 
-const socketUrl = "/";
+const socketUrl = import.meta.env.VITE_API_URL;
+
 
 /* ======================================================
    ADMIN LAYOUT
@@ -100,7 +101,11 @@ export default function AdminLayout({ children }) {
      SOCKET.IO EVENTS
   ====================================================== */
   useEffect(() => {
-    const socket = clientIo(socketUrl, { transports: ["websocket"] });
+    const socket = clientIo(socketUrl, {
+  transports: ["websocket"],
+  withCredentials: true,
+});
+
     socketRef.current = socket;
 
     /* 🔔 NEW ENROLLMENT (always pending) */
