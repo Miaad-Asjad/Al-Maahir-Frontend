@@ -14,7 +14,7 @@ const AdminEditCoursePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  /* ================= AUTO FIELD NAME GENERATOR ================= */
+  
   const generateFieldName = (label) => {
     return label
       .toLowerCase()
@@ -25,7 +25,7 @@ const AdminEditCoursePage = () => {
       .join("");
   };
 
-  /* ================= LOAD COURSE ================= */
+  
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/courses/${slug}`)
@@ -61,11 +61,11 @@ const AdminEditCoursePage = () => {
       });
   }, [slug, navigate]);
 
-  /* ================= CHANGE HANDLER ================= */
+  
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  /* ================= ENROLLMENT BUILDER ================= */
+  
 
   const addField = () => {
     setFormFields([
@@ -85,7 +85,7 @@ const AdminEditCoursePage = () => {
     const updated = [...formFields];
     updated[index][key] = value;
 
-    // auto-generate key ONLY if new field
+    
     if (key === "label" && !updated[index].name) {
       updated[index].name = generateFieldName(value);
     }

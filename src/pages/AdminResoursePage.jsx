@@ -29,9 +29,7 @@ const AdminResourcesPage = () => {
       .finally(() => setLoading(false));
   };
 
-  // =========================
-  // UPLOAD RESOURCE
-  // =========================
+  
   const uploadResource = async (e) => {
     e.preventDefault();
     if (!file) return alert("Please select a file");
@@ -56,9 +54,8 @@ const AdminResourcesPage = () => {
     }
   };
 
-  // =========================
-  // DELETE
-  // =========================
+
+
   const deleteResource = async (id) => {
     if (!window.confirm("Delete this resource?")) return;
 
@@ -70,18 +67,16 @@ const AdminResourcesPage = () => {
     }
   };
 
-  // =========================
-  // START EDITING
-  // =========================
+
+
   const startEdit = (r) => {
     setEditingId(r._id);
     setEditTitle(r.title);
     setEditType(r.type);
   };
 
-  // =========================
-  // SAVE EDIT
-  // =========================
+
+  
   const saveEdit = async (id) => {
     try {
       await axios.put(`/api/resources/${id}`, {

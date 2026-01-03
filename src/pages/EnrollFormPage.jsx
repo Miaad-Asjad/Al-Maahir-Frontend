@@ -13,7 +13,7 @@ const EnrollFormPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  /* ================= LOAD COURSE ================= */
+ 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setLoading(true);
@@ -40,7 +40,7 @@ const EnrollFormPage = () => {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  /* ================= LOADING STATE ================= */
+  
   if (loading) {
     return (
       <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
@@ -64,7 +64,7 @@ const EnrollFormPage = () => {
 
   const fields = course.formFields || [];
 
-  /* ================= HANDLERS ================= */
+ 
   const handleChange = (e, field) => {
     if (field?.type === "file") {
       setFileValue(e.target.files[0] || null);
@@ -117,7 +117,7 @@ const EnrollFormPage = () => {
     }
   };
 
-  /* ================= UI ================= */
+  
   return (
     <div className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen
       bg-gradient-to-b from-white via-purple-50 to-purple-100">

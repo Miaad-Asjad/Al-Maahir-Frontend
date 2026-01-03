@@ -41,7 +41,7 @@ const AdminAddCoursePage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* ================= 🔑 AUTO FIELD NAME GENERATOR ================= */
+  
   const generateFieldName = (label) => {
     return label
       .toLowerCase()
@@ -56,13 +56,13 @@ const AdminAddCoursePage = () => {
       .join("");
   };
 
-  /* ================= FORM FIELD BUILDER ================= */
+  
 
   const addField = () => {
     setFormFields([
       ...formFields,
       {
-        name: "",        // 🔥 auto generated
+        name: "",        //  auto generated
         label: "",
         type: "text",
         required: false,
@@ -76,7 +76,7 @@ const AdminAddCoursePage = () => {
     const updated = [...formFields];
     updated[index][key] = value;
 
-    // 🔥 AUTO-GENERATE NAME FROM LABEL
+    //  AUTO-GENERATE NAME FROM LABEL
     if (key === "label") {
       updated[index].name = generateFieldName(value);
     }
@@ -94,7 +94,7 @@ const AdminAddCoursePage = () => {
     setFormFields(formFields.filter((_, i) => i !== index));
   };
 
-  /* ================= SUBMIT ================= */
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -171,10 +171,7 @@ const AdminAddCoursePage = () => {
             />
           </div>
 
-          {/* OTHER COURSE FIELDS (UNCHANGED) */}
-          {/* ... tumhara baqi code bilkul same hai ... */}
-
-          {/* 🔥 ENROLLMENT QUESTIONS BUILDER */}
+          {/*  ENROLLMENT QUESTIONS BUILDER */}
           <hr className="my-6 opacity-30" />
 
           <h2 className="text-xl font-bold text-amber-300">
@@ -186,8 +183,7 @@ const AdminAddCoursePage = () => {
               key={i}
               className="border border-white/20 p-4 rounded-lg space-y-2"
             >
-              {/* ❌ FIELD NAME INPUT REMOVED */}
-              {/* ✅ ADMIN ONLY SEES QUESTION LABEL */}
+          
 
               <input
                 placeholder="Question (e.g. Can you commit to 90% attendance?)"
@@ -196,7 +192,7 @@ const AdminAddCoursePage = () => {
                 className="w-full px-3 py-2 rounded bg-white text-black"
               />
 
-              {/* OPTIONAL — SHOW GENERATED KEY (READ ONLY) */}
+              
               {f.name && (
                 <p className="text-xs text-blue-200">
                   System key: <span className="italic">{f.name}</span>

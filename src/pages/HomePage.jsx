@@ -52,8 +52,6 @@ const HomePage = () => {
           </Link>
         </motion.div>
 
-        {/* Divider Line */}
-        {/* Divider Line */}
 <motion.div
   className="border-t border-amber-400/30 mt-10 mb-6 w-40 mx-auto"
   initial={{ scaleX: 0 }}

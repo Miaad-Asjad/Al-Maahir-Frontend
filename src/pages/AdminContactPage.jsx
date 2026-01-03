@@ -1,195 +1,5 @@
 
 
-
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { motion } from "framer-motion";
-// import { Search, Eye, Trash2, Mail } from "lucide-react";
-
-// const AdminContactPage = () => {
-//   const [messages, setMessages] = useState([]);
-//   const [search, setSearch] = useState("");
-//   const [loading, setLoading] = useState(true);
-//   const [selected, setSelected] = useState(null);
-
-//   /* ================= LOAD MESSAGES ================= */
-//   useEffect(() => {
-//     axios
-//       .get("/api/contact/messages")
-//       .then((res) => setMessages(res.data))
-//       .catch(console.error)
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   /* ================= MARK AS READ ================= */
-//   const markAsRead = async (id) => {
-//     try {
-//       await axios.put(`/api/contact/${id}/read`);
-
-//       setMessages((prev) =>
-//         prev.map((msg) =>
-//           msg._id === id ? { ...msg, read: true } : msg
-//         )
-//       );
-
-//       // 🔔 notify AdminLayout
-//       window.dispatchEvent(new Event("message-read"));
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   /* ================= DELETE MESSAGE ================= */
-//   const deleteMessage = async (id) => {
-//     if (!window.confirm("Delete this message?")) return;
-
-//     try {
-//       await axios.delete(`/api/contact/${id}`);
-
-//       setMessages((prev) => prev.filter((msg) => msg._id !== id));
-
-//       // 🔔 notify AdminLayout
-//       window.dispatchEvent(new Event("message-read"));
-//     } catch (err) {
-//       console.error(err);
-//       alert("Failed to delete message");
-//     }
-//   };
-
-//   /* ================= SEARCH ================= */
-//   const filtered = messages.filter((msg) => {
-//     const q = search.toLowerCase();
-//     return (
-//       msg.name.toLowerCase().includes(q) ||
-//       msg.subject.toLowerCase().includes(q) ||
-//       msg.email.toLowerCase().includes(q)
-//     );
-//   });
-
-//   if (loading) {
-//     return (
-//       <div className="pt-[150px] text-center text-white">
-//         Loading messages...
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="pt-[150px] pb-20 px-4 min-h-screen bg-gradient-to-b from-blue-950 via-purple-900 to-blue-950 text-white">
-
-//       <motion.h1
-//         className="text-3xl font-extrabold text-center text-amber-300 mb-10"
-//         initial={{ opacity: 0, y: -40 }}
-//         animate={{ opacity: 1, y: 0 }}
-//       >
-//         Contact Messages
-//       </motion.h1>
-
-//       {/* SEARCH */}
-//       <div className="max-w-4xl mx-auto mb-8 flex gap-3 bg-white/10 px-4 py-2 rounded-xl">
-//         <Search className="text-amber-300" />
-//         <input
-//           className="bg-transparent w-full outline-none text-white"
-//           placeholder="Search..."
-//           value={search}
-//           onChange={(e) => setSearch(e.target.value)}
-//         />
-//       </div>
-
-//       {/* TABLE */}
-//       <div className="max-w-6xl mx-auto bg-white/10 rounded-2xl p-6">
-//         {filtered.length === 0 ? (
-//           <p className="text-center text-blue-200">No messages found.</p>
-//         ) : (
-//           <table className="w-full">
-//             <thead>
-//               <tr className="border-b border-white/20">
-//                 <th>Name</th>
-//                 <th>Email</th>
-//                 <th>Subject</th>
-//                 <th>Status</th>
-//                 <th className="text-center">Actions</th>
-//               </tr>
-//             </thead>
-
-//             <tbody>
-//               {filtered.map((msg) => (
-//                 <tr key={msg._id} className="border-b border-white/10">
-//                   <td>{msg.name}</td>
-//                   <td>{msg.email}</td>
-//                   <td>{msg.subject}</td>
-
-//                   <td>
-//                     {msg.read ? (
-//                       <span className="text-green-400">Read</span>
-//                     ) : (
-//                       <span className="text-red-400">Unread</span>
-//                     )}
-//                   </td>
-
-//                   <td className="flex gap-3 justify-center py-2">
-//                     {!msg.read && (
-//                       <button
-//                         onClick={() => markAsRead(msg._id)}
-//                         className="text-green-400"
-//                       >
-//                         <Mail size={18} />
-//                       </button>
-//                     )}
-
-//                     <button
-//                       onClick={() => {
-//                         setSelected(msg);
-//                         if (!msg.read) markAsRead(msg._id);
-//                       }}
-//                       className="text-amber-300"
-//                     >
-//                       <Eye size={18} />
-//                     </button>
-
-//                     <button
-//                       onClick={() => deleteMessage(msg._id)}
-//                       className="text-red-400"
-//                     >
-//                       <Trash2 size={18} />
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         )}
-//       </div>
-
-//       {/* MODAL */}
-//       {selected && (
-//         <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
-//           <div className="bg-white text-black p-6 rounded-xl max-w-lg w-full">
-//             <h2 className="text-xl font-bold mb-3">Message</h2>
-//             <p><b>Name:</b> {selected.name}</p>
-//             <p><b>Email:</b> {selected.email}</p>
-//             <p className="mt-2 whitespace-pre-line">{selected.message}</p>
-
-//             <div className="text-right mt-4">
-//               <button
-//                 onClick={() => setSelected(null)}
-//                 className="px-4 py-2 bg-purple-700 text-white rounded"
-//               >
-//                 Close
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//     </div>
-//   );
-// };
-
-// export default AdminContactPage;
-
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -206,7 +16,7 @@ const AdminContactPage = () => {
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
-  /* ================= LOAD MESSAGES ================= */
+  
   useEffect(() => {
     axios
       .get("/api/contact/messages")
@@ -216,7 +26,7 @@ const AdminContactPage = () => {
        window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  /* ================= MARK READ ================= */
+ 
   const markAsRead = async (id) => {
     try {
       await axios.put(`/api/contact/${id}/read`);
@@ -229,7 +39,7 @@ const AdminContactPage = () => {
     }
   };
 
-  /* ================= DELETE ================= */
+  
   const deleteMessage = async (id) => {
     if (!window.confirm("Delete this message?")) return;
     try {
@@ -241,7 +51,7 @@ const AdminContactPage = () => {
     }
   };
 
-  /* ================= SEND REPLY ================= */
+  
   const sendReply = async () => {
     if (!replyText.trim()) {
       alert("Reply cannot be empty");
@@ -272,7 +82,7 @@ const AdminContactPage = () => {
     }
   };
 
-  /* ================= SEARCH ================= */
+  
   const filtered = messages.filter((m) => {
     const q = search.toLowerCase();
     return (

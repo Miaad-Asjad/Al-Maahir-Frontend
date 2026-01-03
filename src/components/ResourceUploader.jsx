@@ -5,7 +5,6 @@ const ResourceUploader = ({ onUpload }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  /* ================= PAGE START FROM TOP ================= */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -27,7 +26,7 @@ const ResourceUploader = ({ onUpload }) => {
     }
   };
 
-  /* ================= LOADER ================= */
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">

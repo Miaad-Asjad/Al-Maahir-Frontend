@@ -9,29 +9,28 @@ const AdminCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load courses (defensive)
+  
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/courses"); // ensure axios.baseURL is set (see note)
+        const res = await axios.get("/api/courses"); 
         console.log("GET /api/courses response:", res);
         const data = res?.data;
 
-        // If backend returned an object for some reason, convert to array
+        
         if (!data) {
           setCourses([]);
         } else if (Array.isArray(data)) {
           setCourses(data);
         } else if (typeof data === "object") {
-          // If it's a single course object or error object, try to detect
-          // If it looks like a course (has _id or title) put in array
+          
           if (data._id || data.title || data.slug) {
             setCourses([data]);
           } else if (data.data && Array.isArray(data.data)) {
-            // sometimes API returns { data: [...] }
+            
             setCourses(data.data);
           } else {
-            // otherwise set empty and log so you can inspect
+            
             console.warn("Unexpected /api/courses response shape:", data);
             setCourses([]);
           }
@@ -47,7 +46,7 @@ const AdminCoursesPage = () => {
     })();
   }, []);
 
-  // Duplicate/Delete handlers (unchanged)
+ 
   const duplicateCourse = async (slug) => {
     if (!window.confirm("Create a duplicate of this course?")) return;
     try {

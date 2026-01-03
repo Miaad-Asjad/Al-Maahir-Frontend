@@ -88,7 +88,7 @@ const AdminSidebar = ({ open, setOpen }) => {
               <Link
                 key={path}
                 to={path}
-                onClick={() => setOpen(false)} // close on mobile click
+                onClick={() => setOpen(false)} 
                 className={`
                   flex items-center justify-between
                   px-3 py-2 rounded-lg transition

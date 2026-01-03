@@ -10,11 +10,11 @@ const FeeStructurePage = () => {
   const [showOneTimeFee] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* ================= PAGE START FROM TOP ================= */
+  
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // fake delay for smooth professional loader
+    
     const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
   }, []);
@@ -28,7 +28,7 @@ const FeeStructurePage = () => {
     return fee;
   };
 
-  /* ================= LOADER ================= */
+  
   if (loading) {
     return (
       <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
