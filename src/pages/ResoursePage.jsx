@@ -5,9 +5,36 @@ import { FileText, FileVideo, FileAudio, Folder } from "lucide-react";
 const ResourcesPage = () => {
   const [resources, setResources] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  /* ================= FETCH RESOURCES ================= */
   useEffect(() => {
-    axios.get("/api/resources").then((res) => setResources(res.data));
+    const fetchResources = async () => {
+      setLoading(true);
+      setError("");
+      setResources([]);
+
+      // Internet check
+      if (!navigator.onLine) {
+        setError("Internet connection failed. Please check your network.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get("/api/resources");
+        setResources(res.data || []);
+      } catch {
+        setError(
+          "Unable to load resources at the moment. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResources();
   }, []);
 
   const filtered =
@@ -38,77 +65,103 @@ const ResourcesPage = () => {
         Learning Resources
       </h1>
 
-      {/* Filters */}
-      <div className="flex justify-center gap-3 mb-10 flex-wrap">
-        {["all", "pdf", "audio", "video", "note"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFilter(t)}
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow 
-              ${
-                filter === t
-                  ? "bg-amber-300 text-blue-900"
-                  : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
-              }
-            `}
-          >
-            {t.toUpperCase()}
-          </button>
-        ))}
-      </div>
+      {/* ================= LOADING ================= */}
+      {loading && (
+        <p className="text-center text-blue-200">
+          Loading resources…
+        </p>
+      )}
 
-      {/* Resource Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {filtered.map((res) => (
-          <div
-            key={res._id}
-            className="bg-white/10 backdrop-blur-lg border border-purple-300/20 
-          p-6 rounded-2xl shadow-lg hover:scale-[1.03] transition transform duration-300"
-          >
-            {/* ICON + TITLE */}
-            <div className="flex items-center gap-3 mb-4">
-              {typeIcon(res.type)}
-
-              <h2 className="font-semibold text-xl text-amber-200">
-                {res.title}
-              </h2>
-            </div>
-
-            {/* Type Badge */}
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold inline-block mb-4
-              ${
-                res.type === "pdf"
-                  ? "bg-red-500/20 text-red-300"
-                  : res.type === "audio"
-                  ? "bg-blue-500/20 text-blue-300"
-                  : res.type === "video"
-                  ? "bg-purple-500/20 text-purple-300"
-                  : "bg-green-500/20 text-green-300"
-              }`}
-            >
-              {res.type.toUpperCase()}
-            </span>
-
-            {/* Open File Button */}
-            <a
-              href={res.url}
-              target="_blank"
-              rel="noreferrer"
-              className="block mt-3 bg-amber-300 text-blue-900 text-center py-2 
-              rounded-lg font-semibold hover:bg-purple-300 transition"
-            >
-              Open Resource
-            </a>
-          </div>
-        ))}
-
-        {filtered.length === 0 && (
-          <p className="text-center text-blue-200 col-span-full">
-            No resources available.
+      {/* ================= ERROR ================= */}
+      {!loading && error && (
+        <div className="text-center max-w-md mx-auto">
+          <p className="text-red-400 font-semibold mb-4">
+            ⚠️ {error}
           </p>
-        )}
-      </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2 bg-amber-300 text-blue-900 rounded-lg font-semibold hover:bg-purple-300 transition"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* ================= DATA ================= */}
+      {!loading && !error && (
+        <>
+          {/* Filters */}
+          <div className="flex justify-center gap-3 mb-10 flex-wrap">
+            {["all", "pdf", "audio", "video", "note"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setFilter(t)}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow 
+                  ${
+                    filter === t
+                      ? "bg-amber-300 text-blue-900"
+                      : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                  }
+                `}
+              >
+                {t.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          {/* Resource Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {filtered.map((res) => (
+              <div
+                key={res._id}
+                className="bg-white/10 backdrop-blur-lg border border-purple-300/20 
+                p-6 rounded-2xl shadow-lg hover:scale-[1.03] transition transform duration-300"
+              >
+                {/* ICON + TITLE */}
+                <div className="flex items-center gap-3 mb-4">
+                  {typeIcon(res.type)}
+                  <h2 className="font-semibold text-xl text-amber-200">
+                    {res.title}
+                  </h2>
+                </div>
+
+                {/* Type Badge */}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold inline-block mb-4
+                    ${
+                      res.type === "pdf"
+                        ? "bg-red-500/20 text-red-300"
+                        : res.type === "audio"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : res.type === "video"
+                        ? "bg-purple-500/20 text-purple-300"
+                        : "bg-green-500/20 text-green-300"
+                    }`}
+                >
+                  {res.type.toUpperCase()}
+                </span>
+
+                {/* Open Button */}
+                <a
+                  href={res.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block mt-3 bg-amber-300 text-blue-900 text-center py-2 
+                  rounded-lg font-semibold hover:bg-purple-300 transition"
+                >
+                  Open Resource
+                </a>
+              </div>
+            ))}
+
+            {filtered.length === 0 && (
+              <p className="text-center text-blue-200 col-span-full">
+                No resources available.
+              </p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

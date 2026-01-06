@@ -11,36 +11,52 @@ const EnrollFormPage = () => {
   const [formValues, setFormValues] = useState({});
   const [fileValue, setFileValue] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
 
- 
+  /* ================= SCROLL + FETCH COURSE ================= */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setLoading(true);
 
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/courses/${slug}`)
-      .then((res) => {
+    const fetchCourse = async () => {
+      setLoading(true);
+      setError("");
+      setCourse(null);
+
+      // 🔴 Internet check
+      if (!navigator.onLine) {
+        setError("Internet connection failed. Please check your network.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`/api/courses/${slug}`);
         const c = res.data;
         setCourse(c);
 
         // init fields
-        const init = {};
+        const init = { name: "", email: "" };
         (c.formFields || []).forEach((f) => {
           init[f.name] = "";
         });
-        init.name = "";
-        init.email = "";
-
         setFormValues(init);
-      })
-      .catch(() => {
-        setCourse(null);
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        if (err?.response?.status === 404) {
+          setError("The requested course could not be found.");
+        } else {
+          setError("Unable to load enrollment form. Please try again later.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourse();
   }, [slug]);
 
-  
+  /* ================= LOADING ================= */
   if (loading) {
     return (
       <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
@@ -52,19 +68,41 @@ const EnrollFormPage = () => {
     );
   }
 
-  if (!course) {
+  /* ================= ERROR ================= */
+  if (error) {
     return (
-      <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
-        <p className="text-red-600 font-semibold">
-          The requested course could not be found.
-        </p>
+      <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="max-w-md text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-3">
+            ⚠️ Oops!
+          </h2>
+          <p className="text-gray-700">{error}</p>
+
+          <div className="flex justify-center gap-4 mt-6">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition"
+            >
+              Retry
+            </button>
+
+            <button
+              onClick={() => navigate("/courses")}
+              className="px-5 py-2 border border-purple-700 text-purple-700 rounded-lg hover:bg-purple-50 transition"
+            >
+              Back to Courses
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
+  if (!course) return null;
+
   const fields = course.formFields || [];
 
- 
+  /* ================= CHANGE HANDLER ================= */
   const handleChange = (e, field) => {
     if (field?.type === "file") {
       setFileValue(e.target.files[0] || null);
@@ -76,10 +114,18 @@ const EnrollFormPage = () => {
     }
   };
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setStatusMsg("");
+
+    // 🔴 Internet check
+    if (!navigator.onLine) {
+      setStatusMsg("Internet connection failed. Please try again.");
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const fd = new FormData();
@@ -92,44 +138,40 @@ const EnrollFormPage = () => {
       const custom = { ...formValues };
       delete custom.name;
       delete custom.email;
-
       fd.append("customFields", JSON.stringify(custom));
 
       if (fileValue) fd.append("file", fileValue);
 
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/enroll`,
-        fd,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post("/api/enroll", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setStatusMsg(
-        "Your enrollment request has been submitted successfully. Our team will contact you soon."
+        "✅ Your enrollment request has been submitted successfully. Our team will contact you soon."
       );
 
       setTimeout(() => navigate("/"), 2500);
     } catch {
       setStatusMsg(
-        "We were unable to submit your enrollment at the moment. Please try again later."
+        "❌ Unable to submit your enrollment at the moment. Please try again later."
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  
+  /* ================= UI ================= */
   return (
-    <div className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen
-      bg-gradient-to-b from-white via-purple-50 to-purple-100">
-
+    <div
+      className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen
+      bg-gradient-to-b from-white via-purple-50 to-purple-100"
+    >
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
-
         <h1 className="text-2xl font-bold text-center text-purple-700 mb-6">
           Enroll — {course.title}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* NAME */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -193,7 +235,10 @@ const EnrollFormPage = () => {
               {f.type === "radio" && (
                 <div className="flex gap-4">
                   {(f.options || []).map((opt) => (
-                    <label key={opt} className="flex items-center gap-2 text-gray-700">
+                    <label
+                      key={opt}
+                      className="flex items-center gap-2 text-gray-700"
+                    >
                       <input
                         type="radio"
                         name={f.name}
@@ -219,7 +264,7 @@ const EnrollFormPage = () => {
             </div>
           ))}
 
-          {/* STATUS MESSAGE */}
+          {/* STATUS */}
           {statusMsg && (
             <p className="text-center text-sm font-medium text-purple-700">
               {statusMsg}
@@ -234,7 +279,6 @@ const EnrollFormPage = () => {
           >
             {submitting ? "Submitting…" : "Submit Enrollment"}
           </button>
-
         </form>
       </div>
     </div>
