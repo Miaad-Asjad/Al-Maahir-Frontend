@@ -29,7 +29,6 @@
 
 //   const [filter, setFilter] = useState("all");
 
-//   /* ✅ UPLOAD STATES */
 //   const [uploading, setUploading] = useState(false);
 //   const [successMsg, setSuccessMsg] = useState("");
 //   const [errorMsg, setErrorMsg] = useState("");
@@ -46,17 +45,14 @@
 //       .finally(() => setLoading(false));
 //   };
 
-//   /* ================= UPLOAD RESOURCE (DEBUG VERSION) ================= */
+//   /* ================= UPLOAD RESOURCE ================= */
 //   const uploadResource = async (e) => {
 //     e.preventDefault();
-
-//     console.log("🟡 Upload started");
 
 //     setSuccessMsg("");
 //     setErrorMsg("");
 
 //     if (!file) {
-//       console.log("🔴 No file selected");
 //       setErrorMsg("Please select a file to upload.");
 //       return;
 //     }
@@ -66,37 +62,30 @@
 //     fd.append("title", title || file.name);
 //     fd.append("type", type);
 
-//     console.log("🟢 FormData ready", {
-//       file: file.name,
-//       type,
-//       title,
-//     });
-
 //     try {
 //       setUploading(true);
-//       console.log("🚀 Sending request...");
 
-//       const res = await axios.post("/api/resources/upload", fd, {
-//         headers: { "Content-Type": "multipart/form-data" },
+//       const token = localStorage.getItem("adminToken");
+
+//       await axios.post("/api/resources/upload", fd, {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//           Authorization: `Bearer ${token}`,
+//         },
 //       });
-
-//       console.log("✅ Upload success response:", res.data);
 
 //       setSuccessMsg("✅ Resource uploaded successfully.");
 //       setFile(null);
 //       setTitle("");
 //       loadResources();
 //     } catch (err) {
-//       console.log("❌ Upload failed error FULL:", err);
-//       console.log("❌ Response:", err?.response);
-
+//       console.error("❌ Upload error:", err);
 //       setErrorMsg(
 //         err?.response?.data?.message ||
 //           "❌ Resource upload failed. Please try again."
 //       );
 //     } finally {
 //       setUploading(false);
-//       console.log("🟣 Upload finished");
 //     }
 //   };
 
@@ -105,7 +94,14 @@
 //     if (!window.confirm("Delete this resource?")) return;
 
 //     try {
-//       await axios.delete(`/api/resources/${id}`);
+//       const token = localStorage.getItem("adminToken");
+
+//       await axios.delete(`/api/resources/${id}`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+
 //       setResources((prev) => prev.filter((r) => r._id !== id));
 //     } catch (err) {
 //       console.error("❌ Delete resource error:", err);
@@ -122,10 +118,17 @@
 
 //   const saveEdit = async (id) => {
 //     try {
-//       await axios.put(`/api/resources/${id}`, {
-//         title: editTitle,
-//         type: editType,
-//       });
+//       const token = localStorage.getItem("adminToken");
+
+//       await axios.put(
+//         `/api/resources/${id}`,
+//         { title: editTitle, type: editType },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         }
+//       );
 
 //       setEditingId(null);
 //       loadResources();
@@ -162,7 +165,6 @@
 
 //   return (
 //     <div className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-gradient-to-b from-blue-950 via-purple-900 to-blue-950 text-white">
-//       {/* Heading */}
 //       <motion.h1
 //         className="text-3xl sm:text-4xl font-extrabold text-center text-amber-300 mb-10"
 //         initial={{ opacity: 0, y: -40 }}
@@ -172,13 +174,11 @@
 //         Resource Manager
 //       </motion.h1>
 
-//       {/* Upload Box */}
 //       <div className="max-w-3xl mx-auto bg-white/10 border border-amber-300/30 p-6 rounded-xl shadow-lg mb-12">
 //         <h2 className="text-xl font-semibold text-amber-300 mb-4 flex items-center gap-2">
 //           <Upload /> Upload New Resource
 //         </h2>
 
-//         {/* STATUS MESSAGES */}
 //         {successMsg && (
 //           <p className="text-green-400 text-sm font-semibold text-center mb-2">
 //             {successMsg}
@@ -227,7 +227,6 @@
 //         </form>
 //       </div>
 
-//       {/* Filters */}
 //       <div className="max-w-4xl mx-auto flex gap-3 justify-center mb-8">
 //         {["all", "pdf", "audio", "video", "note"].map((t) => (
 //           <button
@@ -244,7 +243,6 @@
 //         ))}
 //       </div>
 
-//       {/* Resource Grid */}
 //       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
 //         {filtered.map((r) => (
 //           <div
@@ -333,7 +331,11 @@
 // export default AdminResourcesPage;
 
 
-import { useEffect, useState } from "react";
+
+
+
+
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import {
@@ -366,6 +368,9 @@ const AdminResourcesPage = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // ✅ REF FOR FILE INPUT RESET
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     loadResources();
   }, []);
@@ -382,10 +387,13 @@ const AdminResourcesPage = () => {
   const uploadResource = async (e) => {
     e.preventDefault();
 
+    console.log("🟡 Upload started");
+
     setSuccessMsg("");
     setErrorMsg("");
 
-    if (!file) {
+    if (!(file instanceof File)) {
+      console.log("🔴 Invalid or no file:", file);
       setErrorMsg("Please select a file to upload.");
       return;
     }
@@ -395,30 +403,41 @@ const AdminResourcesPage = () => {
     fd.append("title", title || file.name);
     fd.append("type", type);
 
+    console.log("🟢 FormData ready", {
+      file: file.name,
+      type,
+      title,
+    });
+
     try {
       setUploading(true);
+      console.log("🚀 Sending request...");
 
-      const token = localStorage.getItem("adminToken");
-
-      await axios.post("/api/resources/upload", fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await axios.post("/api/resources/upload", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
+      console.log("✅ Upload success response:", res.data);
 
       setSuccessMsg("✅ Resource uploaded successfully.");
       setFile(null);
       setTitle("");
+
+      // ✅ RESET FILE INPUT SO NEXT UPLOAD WORKS
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
       loadResources();
     } catch (err) {
-      console.error("❌ Upload error:", err);
+      console.log("❌ Upload failed error FULL:", err);
+      console.log("❌ Response:", err?.response);
+
       setErrorMsg(
         err?.response?.data?.message ||
           "❌ Resource upload failed. Please try again."
       );
     } finally {
       setUploading(false);
+      console.log("🟣 Upload finished");
     }
   };
 
@@ -427,14 +446,7 @@ const AdminResourcesPage = () => {
     if (!window.confirm("Delete this resource?")) return;
 
     try {
-      const token = localStorage.getItem("adminToken");
-
-      await axios.delete(`/api/resources/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await axios.delete(`/api/resources/${id}`);
       setResources((prev) => prev.filter((r) => r._id !== id));
     } catch (err) {
       console.error("❌ Delete resource error:", err);
@@ -451,17 +463,10 @@ const AdminResourcesPage = () => {
 
   const saveEdit = async (id) => {
     try {
-      const token = localStorage.getItem("adminToken");
-
-      await axios.put(
-        `/api/resources/${id}`,
-        { title: editTitle, type: editType },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.put(`/api/resources/${id}`, {
+        title: editTitle,
+        type: editType,
+      });
 
       setEditingId(null);
       loadResources();
@@ -492,9 +497,7 @@ const AdminResourcesPage = () => {
   };
 
   if (loading)
-    return (
-      <div className="pt-[140px] text-center text-white">Loading...</div>
-    );
+    return <div className="pt-[140px] text-center text-white">Loading...</div>;
 
   return (
     <div className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-gradient-to-b from-blue-950 via-purple-900 to-blue-950 text-white">
@@ -507,6 +510,7 @@ const AdminResourcesPage = () => {
         Resource Manager
       </motion.h1>
 
+      {/* Upload Box */}
       <div className="max-w-3xl mx-auto bg-white/10 border border-amber-300/30 p-6 rounded-xl shadow-lg mb-12">
         <h2 className="text-xl font-semibold text-amber-300 mb-4 flex items-center gap-2">
           <Upload /> Upload New Resource
@@ -534,6 +538,7 @@ const AdminResourcesPage = () => {
 
           <input
             type="file"
+            ref={fileInputRef}
             className="w-full text-white"
             onChange={(e) => setFile(e.target.files[0])}
           />
@@ -552,14 +557,14 @@ const AdminResourcesPage = () => {
           <button
             type="submit"
             disabled={uploading}
-            className="w-full bg-amber-300 text-blue-900 font-semibold py-2 rounded-lg
-            hover:bg-purple-400 transition disabled:opacity-60"
+            className="w-full bg-amber-300 text-blue-900 font-semibold py-2 rounded-lg hover:bg-purple-400 transition disabled:opacity-60"
           >
             {uploading ? "Uploading…" : "Upload Resource"}
           </button>
         </form>
       </div>
 
+      {/* Filters */}
       <div className="max-w-4xl mx-auto flex gap-3 justify-center mb-8">
         {["all", "pdf", "audio", "video", "note"].map((t) => (
           <button
@@ -576,6 +581,7 @@ const AdminResourcesPage = () => {
         ))}
       </div>
 
+      {/* Resource Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {filtered.map((r) => (
           <div
@@ -627,15 +633,6 @@ const AdminResourcesPage = () => {
                 <p className="text-sm text-blue-200 mb-3">
                   Type: <span className="text-white">{r.type}</span>
                 </p>
-
-                <a
-                  href={r.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-amber-300 underline text-sm"
-                >
-                  View Resource
-                </a>
 
                 <div className="flex gap-4 mt-4">
                   <button
