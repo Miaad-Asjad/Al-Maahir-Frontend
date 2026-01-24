@@ -1,11 +1,7 @@
-
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText, FileVideo, FileAudio, Folder } from "lucide-react";
 
-/* ✅ BACKEND BASE URL */
 const BACKEND_URL = "https://al-maahir-backend-production.up.railway.app";
 
 const ResourcesPage = () => {
@@ -14,32 +10,19 @@ const ResourcesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* ================= FETCH RESOURCES ================= */
   useEffect(() => {
     const fetchResources = async () => {
       setLoading(true);
       setError("");
-      setResources([]);
-
-      // Internet check
-      if (!navigator.onLine) {
-        setError("Internet connection failed. Please check your network.");
-        setLoading(false);
-        return;
-      }
-
       try {
         const res = await axios.get("/api/resources");
         setResources(res.data || []);
       } catch {
-        setError(
-          "Unable to load resources at the moment. Please try again later."
-        );
+        setError("Unable to load resources. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchResources();
   }, []);
 
@@ -51,91 +34,88 @@ const ResourcesPage = () => {
   const typeIcon = (t) => {
     switch (t) {
       case "pdf":
-        return <FileText size={26} className="text-red-400" />;
+        return <FileText size={28} className="text-red-400" />;
       case "audio":
-        return <FileAudio size={26} className="text-blue-400" />;
+        return <FileAudio size={28} className="text-blue-400" />;
       case "video":
-        return <FileVideo size={26} className="text-purple-400" />;
+        return <FileVideo size={28} className="text-purple-400" />;
       case "note":
-        return <Folder size={26} className="text-green-400" />;
+        return <Folder size={28} className="text-green-400" />;
       default:
-        return <Folder size={26} className="text-gray-400" />;
+        return <Folder size={28} className="text-gray-400" />;
     }
   };
 
   return (
-    <div className="pt-[150px] pb-20 bg-gradient-to-b from-blue-950 to-purple-900 text-white min-h-screen px-4">
-
-      {/* Page Title */}
-      <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-10 text-amber-300">
+    <div className="pt-[150px] pb-24 bg-gradient-to-b from-blue-950 to-purple-900 min-h-screen text-white px-4">
+      {/* Title */}
+      <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-14 text-amber-300 tracking-wide">
         Learning Resources
       </h1>
 
-      {/* ================= LOADING ================= */}
+      {/* Loading */}
       {loading && (
-        <p className="text-center text-blue-200">
-          Loading resources…
-        </p>
+        <p className="text-center text-blue-200">Loading resources…</p>
       )}
 
-      {/* ================= ERROR ================= */}
+      {/* Error */}
       {!loading && error && (
         <div className="text-center max-w-md mx-auto">
-          <p className="text-red-400 font-semibold mb-4">
-            ⚠️ {error}
-          </p>
+          <p className="text-red-400 font-semibold mb-4">⚠️ {error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-5 py-2 bg-amber-300 text-blue-900 rounded-lg font-semibold hover:bg-purple-300 transition"
+            className="px-6 py-2 bg-amber-300 text-blue-900 rounded-xl font-semibold hover:bg-purple-300 transition"
           >
             Retry
           </button>
         </div>
       )}
 
-      {/* ================= DATA ================= */}
+      {/* Content */}
       {!loading && !error && (
         <>
           {/* Filters */}
-          <div className="flex justify-center gap-3 mb-10 flex-wrap">
+          <div className="flex justify-center gap-3 mb-14 flex-wrap">
             {["all", "pdf", "audio", "video", "note"].map((t) => (
               <button
                 key={t}
                 onClick={() => setFilter(t)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition shadow 
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300
                   ${
                     filter === t
-                      ? "bg-amber-300 text-blue-900"
+                      ? "bg-amber-300 text-blue-900 shadow-lg scale-105"
                       : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
-                  }
-                `}
+                  }`}
               >
                 {t.toUpperCase()}
               </button>
             ))}
           </div>
 
-          {/* Resource Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {filtered.map((res) => (
               <div
-  key={res._id}
-  className="bg-white/10 backdrop-blur-lg border border-purple-300/20 
-  p-6 rounded-2xl shadow-lg hover:scale-[1.03] transition transform duration-300
-  flex flex-col h-full"
->
-
-                {/* ICON + TITLE */}
-                <div className="flex items-center gap-3 mb-4">
+                key={res._id}
+                className="group bg-gradient-to-br from-white/10 to-white/5
+                border border-white/20 rounded-3xl shadow-xl
+                p-7 flex flex-col h-full transition-all duration-300
+                hover:-translate-y-2 hover:shadow-2xl hover:border-amber-300/50"
+              >
+                {/* Icon */}
+                <div className="w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-white/10 mb-5 group-hover:scale-110 transition">
                   {typeIcon(res.type)}
-                  <h2 className="font-semibold text-xl text-amber-200">
-                    {res.title}
-                  </h2>
                 </div>
 
-                {/* Type Badge */}
+                {/* Title */}
+                <h2 className="text-xl font-bold text-amber-200 leading-snug mb-3 line-clamp-2">
+                  {res.title}
+                </h2>
+
+                {/* Badge */}
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold inline-block mb-4
+                  className={`w-fit px-3 py-1 rounded-full text-xs font-semibold mb-6
                     ${
                       res.type === "pdf"
                         ? "bg-red-500/20 text-red-300"
@@ -149,15 +129,16 @@ const ResourcesPage = () => {
                   {res.type.toUpperCase()}
                 </span>
 
-                {/* ✅ UPDATED BUTTON */}
+                {/* Button */}
                 <a
                   href={`${BACKEND_URL}${res.url}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="block mt-3 bg-amber-300 text-blue-900 text-center py-2 
-                  rounded-lg font-semibold hover:bg-purple-300 transition"
+                  className="mt-auto w-full text-center py-3 rounded-xl font-semibold
+                  bg-gradient-to-r from-amber-300 to-yellow-300 text-blue-900
+                  hover:from-purple-400 hover:to-pink-400 hover:text-white transition-all duration-300"
                 >
-                  View Resource
+                  Open Resource
                 </a>
               </div>
             ))}
