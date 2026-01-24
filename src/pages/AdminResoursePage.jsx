@@ -333,10 +333,6 @@
 // export default AdminResourcesPage;
 
 
-
-
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -402,7 +398,7 @@ const AdminResourcesPage = () => {
     try {
       setUploading(true);
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
 
       await axios.post("/api/resources/upload", fd, {
         headers: {
@@ -431,7 +427,7 @@ const AdminResourcesPage = () => {
     if (!window.confirm("Delete this resource?")) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
 
       await axios.delete(`/api/resources/${id}`, {
         headers: {
@@ -455,7 +451,7 @@ const AdminResourcesPage = () => {
 
   const saveEdit = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("adminToken");
 
       await axios.put(
         `/api/resources/${id}`,
