@@ -32,7 +32,7 @@ const EnrollFormPage = () => {
       }
 
       try {
-        const res = await axios.get(`/api/courses/${slug}`);
+        axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, fd)
         const c = res.data;
         setCourse(c);
 
