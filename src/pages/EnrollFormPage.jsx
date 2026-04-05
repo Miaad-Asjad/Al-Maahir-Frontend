@@ -93,12 +93,11 @@ const EnrollFormPage = () => {
       fd.append("customFields", JSON.stringify(custom));
 
       /* ✅ FIXED FILE APPEND */
-      Object.keys(fileValues).forEach((key) => {
-        if (fileValues[key]) {
-          // fd.append("file", fileValues[key]); // backend single file expect karta hai
-          fd.append("file", fileValues[key]);
-        }
-      });
+Object.keys(fileValues).forEach((key) => {
+  if (fileValues[key]) {
+    fd.append(key, fileValues[key]); // use key = input name (audio/receipt)
+  }
+});
 
       await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
