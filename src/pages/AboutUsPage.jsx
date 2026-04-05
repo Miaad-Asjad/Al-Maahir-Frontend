@@ -7,17 +7,17 @@ import Loader from "../components/Loader";
 const AboutUsPage = () => {
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Loader control
+ 
   useEffect(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 600); // smooth professional delay
+    }, 600); 
 
     return () => clearTimeout(timer);
   }, []);
 
-  // 🔹 Loader render
+ 
   if (loading) {
     return <Loader text="Loading About Us..." />;
   }
