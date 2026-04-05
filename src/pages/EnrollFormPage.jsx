@@ -96,7 +96,7 @@ const EnrollFormPage = () => {
       Object.keys(fileValues).forEach((key) => {
         if (fileValues[key]) {
           // fd.append("file", fileValues[key]); // backend single file expect karta hai
-          console.log("FILES SENDING:", fileValues);
+          fd.append(key, fileValues[key]);
         }
       });
 
