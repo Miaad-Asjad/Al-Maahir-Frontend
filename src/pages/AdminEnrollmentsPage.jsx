@@ -201,25 +201,31 @@ const AdminEnrollmentsPage = () => {
 
             {/* FILE */}
             <div className="mt-5">
-              <h3 className="font-semibold text-purple-600 mb-2">
-                Uploaded File
-              </h3>
+  <h3 className="font-semibold text-purple-600 mb-2">
+    Uploaded Files
+  </h3>
 
-              {selected.file ? (
-                <a
-                  href={`${import.meta.env.VITE_API_URL || "http://localhost:2000"}/uploads/${selected.file}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition"
-                >
-                  <Download size={18} /> View / Download
-                </a>
-              ) : (
-                <p className="text-gray-500 text-sm">
-                  No file uploaded
-                </p>
-              )}
-            </div>
+  {selected.files && Object.keys(selected.files).length > 0 ? (
+    <div className="space-y-2">
+      {Object.entries(selected.files).map(([key, file]) => (
+        <a
+          key={key}
+          href={`${import.meta.env.VITE_API_URL || "http://localhost:2000"}/uploads/${file}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition mr-2"
+        >
+          <Download size={18} />
+          {key} file
+        </a>
+      ))}
+    </div>
+  ) : (
+    <p className="text-gray-500 text-sm">
+      No files uploaded
+    </p>
+  )}
+</div>
           </div>
         </div>
       )}
