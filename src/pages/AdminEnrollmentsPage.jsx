@@ -201,24 +201,57 @@ const AdminEnrollmentsPage = () => {
 
             {/* FILE */}
             <div className="mt-5">
-  <h3 className="font-semibold text-purple-600 mb-2">
+  <h3 className="font-semibold text-purple-600 mb-3">
     Uploaded Files
   </h3>
 
   {selected.files && Object.keys(selected.files).length > 0 ? (
-    <div className="space-y-2">
-      {Object.entries(selected.files).map(([key, file]) => (
-        <a
-          key={key}
-          href={`${import.meta.env.VITE_API_URL || "http://localhost:2000"}/uploads/${file}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition mr-2"
-        >
-          <Download size={18} />
-          {key} file
-        </a>
-      ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {Object.entries(selected.files).map(([key, file]) => {
+        const url = `${import.meta.env.VITE_API_URL || "http://localhost:2000"}/uploads/${file}`;
+
+        const isImage = file.match(/\.(jpg|jpeg|png|webp)$/i);
+        const isAudio = file.match(/\.(mp3|wav|ogg|m4a)$/i);
+
+        return (
+          <div
+            key={key}
+            className="bg-purple-50 border rounded-lg p-3 shadow-sm"
+          >
+            {/* LABEL */}
+            <p className="text-sm font-semibold text-gray-700 mb-2 break-words">
+              {key}
+            </p>
+
+            {/* IMAGE PREVIEW */}
+            {isImage && (
+              <img
+                src={url}
+                alt={key}
+                className="w-full h-40 object-cover rounded mb-2"
+              />
+            )}
+
+            {/* AUDIO PLAYER */}
+            {isAudio && (
+              <audio controls className="w-full mb-2">
+                <source src={url} />
+              </audio>
+            )}
+
+            {/* DOWNLOAD BUTTON */}
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 bg-purple-700 text-white px-3 py-2 rounded-md text-sm hover:bg-purple-800 transition"
+            >
+              <Download size={16} />
+              View / Download
+            </a>
+          </div>
+        );
+      })}
     </div>
   ) : (
     <p className="text-gray-500 text-sm">
