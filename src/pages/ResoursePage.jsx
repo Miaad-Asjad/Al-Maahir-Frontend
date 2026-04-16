@@ -288,7 +288,7 @@ const ResourcesPage = () => {
 
                 {/* Button */}
                 <a
-                  href={`${BACKEND_URL}${res.url}`}
+                  href={res.url}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-auto w-full text-center py-2.5 rounded-lg font-semibold text-sm
