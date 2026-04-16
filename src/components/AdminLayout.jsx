@@ -255,14 +255,6 @@ import { Bell, Mail, Menu } from "lucide-react";
 
 
 
-
-useEffect(() => {
-  const token = localStorage.getItem("adminToken");
-
-  if (token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  }
-}, []); 
 /* ================= CONTEXT ================= */
 const NotificationContext = createContext();
 export function useNotifications() {
