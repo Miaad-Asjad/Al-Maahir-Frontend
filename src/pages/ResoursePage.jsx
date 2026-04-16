@@ -163,8 +163,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText, FileVideo, FileAudio, Folder } from "lucide-react";
 
-const BACKEND_URL = "https://al-maahir-backend-production.up.railway.app";
-
 const ResourcesPage = () => {
   const [resources, setResources] = useState([]);
   const [filter, setFilter] = useState("all");

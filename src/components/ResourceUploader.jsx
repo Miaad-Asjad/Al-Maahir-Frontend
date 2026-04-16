@@ -11,7 +11,12 @@ const ResourceUploader = ({ onUpload }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return;
+  console.log("FILE STATE:", file);
+
+if (!file) {
+  alert("Please select a file first");
+  return;
+}
 
     setLoading(true);
 
