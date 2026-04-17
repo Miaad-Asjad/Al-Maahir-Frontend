@@ -636,10 +636,10 @@ const AdminResourcesPage = () => {
       // 🔥 Cloudinary upload
       const cloudData = new FormData();
       cloudData.append("file", file);
-      cloudData.append("upload_preset", "almaahir_upload");
+      cloudData.append("upload_preset", "almaahir");
 
       const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/dfclbucksk/raw/upload",
+        "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
         {
           method: "POST",
           body: cloudData,
