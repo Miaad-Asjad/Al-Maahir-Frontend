@@ -610,7 +610,6 @@ const AdminResourcesPage = () => {
     loadResources();
   }, []);
 
-  /* ================= LOAD ================= */
   const loadResources = () => {
     axios
       .get(`${API_URL}/api/resources`)
@@ -619,7 +618,7 @@ const AdminResourcesPage = () => {
       .finally(() => setLoading(false));
   };
 
-  /* ================= UPLOAD ================= */
+  
   const uploadResource = async (e) => {
     e.preventDefault();
 
@@ -640,7 +639,7 @@ const AdminResourcesPage = () => {
       cloudData.append("upload_preset", "almaahir_upload");
 
       const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+        "https://api.cloudinary.com/v1_1/dfclbucksk/raw/upload",
         {
           method: "POST",
           body: cloudData,
