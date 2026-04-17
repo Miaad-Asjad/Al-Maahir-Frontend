@@ -413,9 +413,8 @@ const AdminResourcesPage = () => {
       setUploading(true);
       console.log("🚀 Sending request...");
 
-      const res = await axios.post("/api/resources/upload", fd, {
+ const res = await axios.post("/api/resources/upload", fd, {
   headers: {
-    "Content-Type": "multipart/form-data",
     Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
   },
 });
