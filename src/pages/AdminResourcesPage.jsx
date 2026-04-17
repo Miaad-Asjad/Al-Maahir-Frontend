@@ -406,14 +406,15 @@ const AdminResourcesPage = () => {
     try {
       setUploading(true);
 
-    const res = await axios.post(
+  const res = await axios.post(
   `${API_URL}/api/resources/upload`,
   fd,
   {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
-    withCredentials: false, // 🔥 ADD THIS
+    withCredentials: false,
+    transformRequest: [(data) => data], // IMPORTANT FIX
   }
 );
 
