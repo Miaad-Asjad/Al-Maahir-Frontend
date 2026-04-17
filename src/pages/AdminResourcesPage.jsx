@@ -351,7 +351,6 @@ import {
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://al-maahir-backend-production.up.railway.app";
-
 const AdminResourcesPage = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -407,15 +406,16 @@ const AdminResourcesPage = () => {
     try {
       setUploading(true);
 
-      const res = await axios.post(
-        `${API_URL}/api/resources/upload`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
+    const res = await axios.post(
+  `${API_URL}/api/resources/upload`,
+  fd,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+    },
+    withCredentials: false, // 🔥 ADD THIS
+  }
+);
 
       console.log("✅ Upload success:", res.data);
 
