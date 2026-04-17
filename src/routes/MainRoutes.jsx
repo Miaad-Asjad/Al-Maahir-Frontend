@@ -14,17 +14,18 @@ import AdminLayout from "../components/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoutes";
 
 
-import ResourcesPage from "../pages/ResoursePage";
+
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminCoursesPage from "../pages/AdminCoursesPage";
 import AdminAddCoursePage from "../pages/AdminAddCoursePage";
 import AdminEditCoursePage from "../pages/AdminEditCoursePage";
 import AdminEnrollmentsPage from "../pages/AdminEnrollmentsPage";
-import AdminResourcesPage from "../pages/AdminResoursePage";
+import AdminResourcesPage from "../pages/AdminResourcesPage";
 import AdminCalendarPage from "../pages/AdminCalendarPage";
 import AdminTestimonialsPage from "../pages/AdminTestimonialPage";
 import AdminLoginPage from "../pages/AdminLoginPage";
 import AdminContactPage from "../pages/AdminContactPage";
+import ResourcesPage from "../pages/ResourcesPage";
 
 
 const MainRoutes = () => {
