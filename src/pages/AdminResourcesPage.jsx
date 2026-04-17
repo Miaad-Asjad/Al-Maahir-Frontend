@@ -376,84 +376,76 @@ const AdminResourcesPage = () => {
   }, []);
 
   /* ================= LOAD ================= */
-  const loadResources = () => {
-    axios
-      .get(`${API_URL}/api/resources`)
-      .then((res) => setResources(res.data))
-      .catch((err) => console.error("❌ Load resources error:", err))
-      .finally(() => setLoading(false));
-  };
+ const uploadResource = async (e) => {
+  e.preventDefault();
 
-  /* ================= UPLOAD ================= */
-  const uploadResource = async (e) => {
-    e.preventDefault();
+  setSuccessMsg("");
+  setErrorMsg("");
 
-    console.log("🟡 Upload started");
-
-    setSuccessMsg("");
-    setErrorMsg("");
-
-    if (!(file instanceof File)) {
-      setErrorMsg("Please select a file.");
-      return;
-    }
-
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("title", title || file.name);
-    fd.append("type", type);
-
-    try {
-      setUploading(true);
-
-  const res = await axios.post(
-  `${API_URL}/api/resources/upload`,
-  fd,
-  {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-    withCredentials: false,
-    transformRequest: [(data) => data], // IMPORTANT FIX
+  if (!(file instanceof File)) {
+    setErrorMsg("Please select a file.");
+    return;
   }
-);
 
-      console.log("✅ Upload success:", res.data);
+  try {
+    setUploading(true);
 
-      setSuccessMsg("✅ Uploaded successfully!");
-      setFile(null);
-      setTitle("");
+    /* ================= STEP 1: CLOUDINARY UPLOAD ================= */
+    const cloudData = new FormData();
+    cloudData.append("file", file);
+    cloudData.append("upload_preset", "almaahir_upload");
 
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    const cloudRes = await fetch(
+      "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+      {
+        method: "POST",
+        body: cloudData,
+      }
+    );
 
-      loadResources();
-    } catch (err) {
-      console.log("❌ Upload error:", err);
+    const cloudResult = await cloudRes.json();
 
-      setErrorMsg(
-        err?.response?.data?.message || "Upload failed. Try again."
-      );
-    } finally {
-      setUploading(false);
+    if (!cloudResult.secure_url) {
+      throw new Error("Cloudinary upload failed");
     }
-  };
 
-  /* ================= DELETE ================= */
-  const deleteResource = async (id) => {
-    if (!window.confirm("Delete this resource?")) return;
+    console.log("✅ Cloudinary URL:", cloudResult.secure_url);
 
-    try {
-      await axios.delete(`${API_URL}/api/resources/${id}`, {
+    /* ================= STEP 2: SEND URL TO BACKEND ================= */
+    const res = await axios.post(
+      `${API_URL}/api/resources/upload`,
+      {
+        title: title || file.name,
+        type: type,
+        url: cloudResult.secure_url,
+      },
+      {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
-      });
+      }
+    );
 
-      setResources((prev) => prev.filter((r) => r._id !== id));
-    } catch (err) {
-      alert("Delete failed");
-    }
-  };
+    console.log("✅ Upload success:", res.data);
+
+    setSuccessMsg("✅ Uploaded successfully!");
+    setFile(null);
+    setTitle("");
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    loadResources();
+
+  } catch (err) {
+    console.log("❌ Upload error:", err);
+
+    setErrorMsg(
+      err?.response?.data?.message || "Upload failed. Try again."
+    );
+  } finally {
+    setUploading(false);
+  }
+};
 
   /* ================= EDIT ================= */
   const startEdit = (r) => {
