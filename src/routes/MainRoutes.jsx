@@ -25,7 +25,8 @@ import AdminCalendarPage from "../pages/AdminCalendarPage";
 import AdminTestimonialsPage from "../pages/AdminTestimonialPage";
 import AdminLoginPage from "../pages/AdminLoginPage";
 import AdminContactPage from "../pages/AdminContactPage";
-import ResourcesPage from "../pages/ResourcesPage";
+import ResourcesPage from "../pages/ResourcesPages";
+
 
 
 
@@ -40,7 +41,7 @@ const MainRoutes = () => {
       <Route path="/enroll/:slug" element={<EnrollFormPage />} />
       <Route path="/fee-structure" element={<FeeStructurePage />} />
       <Route path="/academic-calendar" element={<AcademicCalendarPage />} />
-      <Route path="/resources" element={<ResourcesPage />} />
+     <Route path="/resources" element={<ResourcesPage/>} />
       <Route path="/contact" element={<ContactPage />} />
 
      
