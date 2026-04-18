@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, Eye, Download, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, Download, X, Trash2 } from "lucide-react";
 
 
 const formatLabel = (key) => {
@@ -152,7 +152,7 @@ const AdminEnrollmentsPage = () => {
                               onClick={() => deleteEnrollment(stu._id)}
                               className="text-red-500 hover:text-red-400"
                             >
-                              🗑️
+                              <Trash2 size={18} />
                             </button>
                           </button>
                         </div>
