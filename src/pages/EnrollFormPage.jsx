@@ -1,3 +1,5 @@
+
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -22,6 +24,12 @@ const EnrollFormPage = () => {
       setError("");
       setCourse(null);
 
+      if (!navigator.onLine) {
+        setError("Internet connection failed. Please check your network.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses/${slug}`);
         const c = res.data;
@@ -32,8 +40,11 @@ const EnrollFormPage = () => {
           init[f.name] = "";
         });
         setFormValues(init);
-      } catch {
-        setError("Unable to load enrollment form.");
+      } catch (err) {
+        if (err?.response?.status === 404)
+          setError("The requested course could not be found.");
+        else
+          setError("Unable to load enrollment form. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -42,6 +53,7 @@ const EnrollFormPage = () => {
     fetchCourse();
   }, [slug]);
 
+  /* ✅ FIXED HANDLE CHANGE */
   const handleChange = (e, field) => {
     if (field?.type === "file") {
       setFileValues((prev) => ({
@@ -56,77 +68,132 @@ const EnrollFormPage = () => {
     }
   };
 
-  /* 🔥 FIXED CLOUDINARY LOGIC */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setStatusMsg("");
 
+    if (!navigator.onLine) {
+      setStatusMsg("Internet connection failed. Please try again.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      const CLOUD_NAME = "dfclbucsk"; 
-      const UPLOAD_PRESET = "almaahir_upload";
+     const CLOUD_NAME = "dfclbucsk";
+const UPLOAD_PRESET = "almaahir_upload";
 
-      const uploadToCloudinary = async (file) => {
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("upload_preset", UPLOAD_PRESET);
+/* 🔥 Upload helper */
+const uploadToCloudinary = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", UPLOAD_PRESET);
 
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
-          {
-            method: "POST",
-            body: fd,
-          }
-        );
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+    {
+      method: "POST",
+      body: fd,
+    }
+  );
 
-        const data = await res.json();
+  const data = await res.json();
 
-        if (!data.secure_url) throw new Error("Upload failed");
+  if (!data.secure_url) {
+    throw new Error("Cloudinary upload failed");
+  }
 
-        return {
-          url: data.secure_url,
-          public_id: data.public_id,
-        };
-      };
+  return {
+    url: data.secure_url,
+    public_id: data.public_id,
+  };
+};
 
-      /* 🔥 Upload files */
-      const uploadedFiles = {};
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+  setStatusMsg("");
 
-      for (const key of Object.keys(fileValues)) {
-        if (fileValues[key]) {
-          const result = await uploadToCloudinary(fileValues[key]);
-          uploadedFiles[key] = result;
-        }
+  if (!navigator.onLine) {
+    setStatusMsg("Internet connection failed. Please try again.");
+    setSubmitting(false);
+    return;
+  }
+
+  try {
+    /* 🔥 STEP 1: Upload all files */
+    const uploadedFiles = {};
+
+    for (const key of Object.keys(fileValues)) {
+      if (fileValues[key]) {
+        const result = await uploadToCloudinary(fileValues[key]);
+        uploadedFiles[key] = result;
       }
+    }
 
-      /* 🔥 Prepare data */
-      const custom = { ...formValues };
-      delete custom.name;
-      delete custom.email;
+    /* 🔥 STEP 2: Prepare data */
+    const custom = { ...formValues };
+    delete custom.name;
+    delete custom.email;
 
-      /* 🔥 API call */
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
-        course: course._id,
-        courseName: course.title,
-        name: formValues.name,
-        email: formValues.email,
-        customFields: custom,
-        files: uploadedFiles,
-      });
+    /* 🔥 STEP 3: Send JSON */
+    await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
+      course: course._id,
+      courseName: course.title,
+      name: formValues.name || "",
+      email: formValues.email || "",
+      customFields: custom,
+      files: uploadedFiles,
+    });
 
-      setStatusMsg("✅ Enrollment submitted successfully!");
-      setTimeout(() => navigate("/"), 2000);
+    setStatusMsg("✅ Your enrollment request has been submitted successfully. Our team will contact you soon.");
+    setTimeout(() => navigate("/"), 2500);
 
-    } catch (err) {
-      console.log(err);
-      setStatusMsg("❌ Submission failed");
+  } catch (err) {
+    console.log(err);
+    setStatusMsg("❌ Unable to submit your enrollment at the moment. Please try again later.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+      setStatusMsg("✅ Your enrollment request has been submitted successfully. Our team will contact you soon.");
+
+      setTimeout(() => navigate("/"), 2500);
+    } catch {
+      setStatusMsg("❌ Unable to submit your enrollment at the moment. Please try again later.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading)
+    return (
+      <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-sm">Loading enrollment form…</p>
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="max-w-md text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-3">⚠️ Oops!</h2>
+          <p className="text-gray-700">{error}</p>
+          <div className="flex justify-center gap-4 mt-6">
+            <button onClick={() => window.location.reload()} className="px-5 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition">
+              Retry
+            </button>
+            <button onClick={() => navigate("/courses")} className="px-5 py-2 border border-purple-700 text-purple-700 rounded-lg hover:bg-purple-50 transition">
+              Back to Courses
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
   if (!course) return null;
 
   const fields = course.formFields || [];
@@ -139,42 +206,106 @@ const EnrollFormPage = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formValues.name || ""}
+              onChange={handleChange}
+              required
+              className="w-full border rounded px-3 py-2 text-black bg-white"
+            />
+          </div>
 
-          <input
-            type="text"
-            name="name"
-            value={formValues.name || ""}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2 text-black bg-white"
-          />
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formValues.email || ""}
+              onChange={handleChange}
+              required
+              className="w-full border rounded px-3 py-2 text-black bg-white"
+            />
+          </div>
 
-          <input
-            type="email"
-            name="email"
-            value={formValues.email || ""}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2 text-black bg-white"
-          />
-
+          {/* Dynamic Fields */}
           {fields.map((f) => (
             <div key={f.name}>
-              {f.type === "file" ? (
-                <input type="file" onChange={(e) => handleChange(e, f)} />
-              ) : (
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {f.label} {f.required && "*"}
+              </label>
+
+              {(f.type === "text" ||
+                f.type === "email" ||
+                f.type === "number" ||
+                f.type === "tel") && (
                 <input
                   type={f.type}
                   value={formValues[f.name] || ""}
                   onChange={(e) => handleChange(e, f)}
+                  required={f.required}
+                  className="w-full border rounded px-3 py-2 text-black bg-white"
+                />
+              )}
+
+              {f.type === "textarea" && (
+                <textarea
+                  rows={4}
+                  value={formValues[f.name] || ""}
+                  onChange={(e) => handleChange(e, f)}
+                  required={f.required}
+                  className="w-full border rounded px-3 py-2 text-black bg-white"
+                />
+              )}
+
+              {f.type === "radio" && (
+                <div className="flex gap-4">
+                  {(f.options || []).map((opt) => (
+                    <label key={opt} className="flex items-center gap-2 text-gray-700">
+                      <input
+                        type="radio"
+                        name={f.name}
+                        value={opt}
+                        checked={formValues[f.name] === opt}
+                        onChange={(e) => handleChange(e, f)}
+                        required={f.required}
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {f.type === "file" && (
+                <input
+                  type="file"
+                  accept={f.accept || "*/*"}
+                  onChange={(e) => handleChange(e, f)}
+                  className="w-full text-black"
                 />
               )}
             </div>
           ))}
 
-          {statusMsg && <p>{statusMsg}</p>}
+          {statusMsg && (
+            <p className="text-center text-sm font-medium text-purple-700">
+              {statusMsg}
+            </p>
+          )}
 
-          <button type="submit" disabled={submitting}>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-purple-700 text-white py-2 rounded-lg font-semibold hover:bg-purple-800 transition"
+          >
             {submitting ? "Submitting…" : "Submit Enrollment"}
           </button>
         </form>
@@ -184,7 +315,6 @@ const EnrollFormPage = () => {
 };
 
 export default EnrollFormPage;
-
 
 
 // import { useEffect, useState } from "react";
