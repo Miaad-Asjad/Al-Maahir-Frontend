@@ -633,13 +633,20 @@ const AdminResourcesPage = () => {
     try {
       setUploading(true);
 
-      // 🔥 Cloudinary upload
+      /* 🔥 STEP 1: GET SIGNATURE */
+      const sigRes = await axios.get(`${API_URL}/api/resources/signature`);
+      const { timestamp, signature, apiKey, cloudName } = sigRes.data;
+
+      /* 🔥 STEP 2: FORM DATA */
       const cloudData = new FormData();
       cloudData.append("file", file);
-      cloudData.append("upload_preset", "test_unsigned_upload");
+      cloudData.append("api_key", apiKey);
+      cloudData.append("timestamp", timestamp);
+      cloudData.append("signature", signature);
 
+      /* 🔥 STEP 3: UPLOAD */
       const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
         {
           method: "POST",
           body: cloudData,
@@ -653,7 +660,7 @@ const AdminResourcesPage = () => {
         throw new Error("Cloudinary upload failed");
       }
 
-      // 🔥 Save to backend
+      /* 🔥 STEP 4: SAVE TO BACKEND */
       await axios.post(
         `${API_URL}/api/resources/upload`,
         {
