@@ -75,6 +75,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://al-maahir-backend-production.up.railway.app";
 
 const ResourceUploader = ({ onUpload }) => {
   const [file, setFile] = useState(null);
@@ -84,14 +89,22 @@ const ResourceUploader = ({ onUpload }) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  /* ================= CLOUDINARY UPLOAD ================= */
+  /* ================= CLOUDINARY SIGNED UPLOAD ================= */
   const uploadToCloudinary = async (file) => {
+    // 🔥 STEP 1: get signature
+    const sigRes = await axios.get(`${API_URL}/api/resources/signature`);
+    const { timestamp, signature, apiKey, cloudName } = sigRes.data;
+
+    // 🔥 STEP 2: prepare form
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("upload_preset", "almaahir_upload"); // 👈 tum preset banaogi
+    fd.append("api_key", apiKey);
+    fd.append("timestamp", timestamp);
+    fd.append("signature", signature);
 
+    // 🔥 STEP 3: upload
     const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
       {
         method: "POST",
         body: fd,
@@ -99,6 +112,8 @@ const ResourceUploader = ({ onUpload }) => {
     );
 
     const data = await res.json();
+
+    console.log("🔥 CLOUD:", data);
 
     if (!data.secure_url) {
       throw new Error("Cloudinary upload failed");
@@ -118,12 +133,10 @@ const ResourceUploader = ({ onUpload }) => {
     setLoading(true);
 
     try {
-      // 🔥 STEP 1: upload to Cloudinary
       const url = await uploadToCloudinary(file);
 
       console.log("✅ Cloudinary URL:", url);
 
-      // 🔥 STEP 2: send ONLY URL to backend
       await onUpload({
         title: file.name,
         url: url,
@@ -133,7 +146,7 @@ const ResourceUploader = ({ onUpload }) => {
       setFile(null);
 
     } catch (err) {
-      console.log("❌ Upload error:", err.message);
+      console.log("❌ Upload error:", err);
       alert("Upload failed");
     } finally {
       setLoading(false);
