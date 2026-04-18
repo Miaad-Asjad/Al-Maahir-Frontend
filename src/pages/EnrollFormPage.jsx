@@ -69,47 +69,6 @@ const EnrollFormPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setStatusMsg("");
-
-    if (!navigator.onLine) {
-      setStatusMsg("Internet connection failed. Please try again.");
-      setSubmitting(false);
-      return;
-    }
-
-    try {
-     const CLOUD_NAME = "dfclbucsk";
-const UPLOAD_PRESET = "almaahir_upload";
-
-/* 🔥 Upload helper */
-const uploadToCloudinary = async (file) => {
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("upload_preset", UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
-    {
-      method: "POST",
-      body: fd,
-    }
-  );
-
-  const data = await res.json();
-
-  if (!data.secure_url) {
-    throw new Error("Cloudinary upload failed");
-  }
-
-  return {
-    url: data.secure_url,
-    public_id: data.public_id,
-  };
-};
-
-const handleSubmit = async (e) => {
   e.preventDefault();
   setSubmitting(true);
   setStatusMsg("");
@@ -121,6 +80,35 @@ const handleSubmit = async (e) => {
   }
 
   try {
+    const CLOUD_NAME = "dfclbucsk"; 
+    const UPLOAD_PRESET = "almaahir_upload";
+
+    /* 🔥 Upload helper */
+    const uploadToCloudinary = async (file) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", UPLOAD_PRESET);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+        {
+          method: "POST",
+          body: fd,
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.secure_url) {
+        throw new Error("Cloudinary upload failed");
+      }
+
+      return {
+        url: data.secure_url,
+        public_id: data.public_id,
+      };
+    };
+
     /* 🔥 STEP 1: Upload all files */
     const uploadedFiles = {};
 
@@ -146,25 +134,21 @@ const handleSubmit = async (e) => {
       files: uploadedFiles,
     });
 
-    setStatusMsg("✅ Your enrollment request has been submitted successfully. Our team will contact you soon.");
+    setStatusMsg(
+      "✅ Your enrollment request has been submitted successfully. Our team will contact you soon."
+    );
+
     setTimeout(() => navigate("/"), 2500);
 
   } catch (err) {
     console.log(err);
-    setStatusMsg("❌ Unable to submit your enrollment at the moment. Please try again later.");
+    setStatusMsg(
+      "❌ Unable to submit your enrollment at the moment. Please try again later."
+    );
   } finally {
     setSubmitting(false);
   }
 };
-      setStatusMsg("✅ Your enrollment request has been submitted successfully. Our team will contact you soon.");
-
-      setTimeout(() => navigate("/"), 2500);
-    } catch {
-      setStatusMsg("❌ Unable to submit your enrollment at the moment. Please try again later.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading)
     return (
