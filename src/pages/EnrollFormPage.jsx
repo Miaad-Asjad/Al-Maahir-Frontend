@@ -80,7 +80,7 @@ const EnrollFormPage = () => {
     }
 
     try {
-     const CLOUD_NAME = "dfclbucksk";
+     const CLOUD_NAME = "dfclbucsk";
 const UPLOAD_PRESET = "almaahir_upload";
 
 /* 🔥 Upload helper */
