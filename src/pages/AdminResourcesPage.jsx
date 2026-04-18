@@ -665,7 +665,7 @@ const uploadResource = async (e) => {
     const cloudData = new FormData();
 
     cloudData.append("file", file, file.name);
-    cloudData.append("upload_preset", "test_unsigned_upload");
+    cloudData.append("upload_preset", "almaahir");
 
     const cloudRes = await fetch(
       "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
