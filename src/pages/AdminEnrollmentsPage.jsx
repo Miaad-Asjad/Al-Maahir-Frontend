@@ -423,6 +423,18 @@ const AdminEnrollmentsPage = () => {
               <p><b>Course:</b> {selected.courseName}</p>
             </div>
 
+            {selected.customFields && Object.keys(selected.customFields).length > 0 && (
+  <div className="mt-4 space-y-2">
+    <h3 className="font-semibold text-purple-600">Additional Details</h3>
+
+    {Object.entries(selected.customFields).map(([key, value]) => (
+      <p key={key} className="text-sm text-gray-700">
+        <b>{key}:</b> {value}
+      </p>
+    ))}
+  </div>
+)}
+
             {/* FILES */}
             <div className="mt-5">
               <h3 className="font-semibold text-purple-600 mb-3">
