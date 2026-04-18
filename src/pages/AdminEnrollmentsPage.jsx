@@ -274,6 +274,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp, Eye, Download, X } from "lucide-react";
 
+
 const formatLabel = (key) => {
   return key
     .replace(/([A-Z])/g, " $1")
@@ -429,7 +430,7 @@ const AdminEnrollmentsPage = () => {
 
     {Object.entries(selected.customFields).map(([key, value]) => (
       <p key={key} className="text-sm text-gray-700">
-        <b>{key}:</b> {value}
+        <b>{formatLabel(key)}:</b> {value}
       </p>
     ))}
   </div>
