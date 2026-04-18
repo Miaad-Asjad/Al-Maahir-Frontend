@@ -75,11 +75,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://al-maahir-backend-production.up.railway.app";
+const CLOUD_NAME = "dfclbucksk"; // ✅ apna correct cloud name
+const UPLOAD_PRESET = "almaahir_upload"; // ✅ tumhara unsigned preset
 
 const ResourceUploader = ({ onUpload }) => {
   const [file, setFile] = useState(null);
@@ -89,22 +87,14 @@ const ResourceUploader = ({ onUpload }) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  /* ================= CLOUDINARY SIGNED UPLOAD ================= */
+  /* ================= CLOUDINARY UNSIGNED UPLOAD ================= */
   const uploadToCloudinary = async (file) => {
-    // 🔥 STEP 1: get signature
-    const sigRes = await axios.get(`${API_URL}/api/resources/signature`);
-    const { timestamp, signature, apiKey, cloudName } = sigRes.data;
-
-    // 🔥 STEP 2: prepare form
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", apiKey);
-    fd.append("timestamp", timestamp);
-    fd.append("signature", signature);
+    fd.append("upload_preset", UPLOAD_PRESET);
 
-    // 🔥 STEP 3: upload
     const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
       {
         method: "POST",
         body: fd,
@@ -116,7 +106,7 @@ const ResourceUploader = ({ onUpload }) => {
     console.log("🔥 CLOUD:", data);
 
     if (!data.secure_url) {
-      throw new Error("Cloudinary upload failed");
+      throw new Error(data.error?.message || "Cloudinary upload failed");
     }
 
     return data.secure_url;
@@ -147,7 +137,7 @@ const ResourceUploader = ({ onUpload }) => {
 
     } catch (err) {
       console.log("❌ Upload error:", err);
-      alert("Upload failed");
+      alert(err.message || "Upload failed");
     } finally {
       setLoading(false);
     }

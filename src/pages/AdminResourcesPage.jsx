@@ -587,6 +587,10 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://al-maahir-backend-production.up.railway.app";
 
+/* ✅ Cloudinary Config (Unsigned) */
+const CLOUD_NAME = "dfclbucsk";
+const UPLOAD_PRESET = "almaahir_upload";
+
 const AdminResourcesPage = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -618,7 +622,7 @@ const AdminResourcesPage = () => {
       .finally(() => setLoading(false));
   };
 
-  /* ================= UPLOAD ================= */
+  /* ================= UPLOAD (FIXED) ================= */
   const uploadResource = async (e) => {
     e.preventDefault();
 
@@ -633,20 +637,13 @@ const AdminResourcesPage = () => {
     try {
       setUploading(true);
 
-      /* 🔥 STEP 1: GET SIGNATURE */
-      const sigRes = await axios.get(`${API_URL}/api/resources/signature`);
-      const { timestamp, signature, apiKey, cloudName } = sigRes.data;
-
-      /* 🔥 STEP 2: FORM DATA */
+      /* ✅ STEP 1: DIRECT CLOUDINARY UPLOAD */
       const cloudData = new FormData();
       cloudData.append("file", file);
-      cloudData.append("api_key", apiKey);
-      cloudData.append("timestamp", timestamp);
-      cloudData.append("signature", signature);
+      cloudData.append("upload_preset", UPLOAD_PRESET);
 
-      /* 🔥 STEP 3: UPLOAD */
       const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
         {
           method: "POST",
           body: cloudData,
@@ -657,10 +654,10 @@ const AdminResourcesPage = () => {
       console.log("🔥 CLOUD:", data);
 
       if (!data.secure_url) {
-        throw new Error("Cloudinary upload failed");
+        throw new Error(data.error?.message || "Cloudinary upload failed");
       }
 
-      /* 🔥 STEP 4: SAVE TO BACKEND */
+      /* ✅ STEP 2: SAVE TO BACKEND */
       await axios.post(
         `${API_URL}/api/resources/upload`,
         {
@@ -684,7 +681,7 @@ const AdminResourcesPage = () => {
 
     } catch (err) {
       console.log(err);
-      setErrorMsg("Upload failed");
+      setErrorMsg(err.message || "Upload failed");
     } finally {
       setUploading(false);
     }
