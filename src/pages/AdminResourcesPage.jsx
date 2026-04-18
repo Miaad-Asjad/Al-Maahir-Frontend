@@ -634,23 +634,37 @@ const AdminResourcesPage = () => {
       setUploading(true);
 
       // 🔥 Cloudinary upload
-      const cloudData = new FormData();
-      cloudData.append("file", file);
-      cloudData.append("upload_preset", "almaahir");
+      // const cloudData = new FormData();
+      // cloudData.append("file", file);
+      // cloudData.append("upload_preset", "almaahir");
+
+      // const cloudRes = await fetch(
+      //   "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+      //   {
+      //     method: "POST",
+      //     body: cloudData,
+      //   }
+      // );
+
+      // const cloudResult = await cloudRes.json();
+
+      // if (!cloudResult.secure_url) {
+      //   throw new Error("Cloudinary upload failed");
+      // }
+
 
       const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
-        {
-          method: "POST",
-          body: cloudData,
-        }
-      );
+  "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+  {
+    method: "POST",
+    body: cloudData,
+  }
+);
 
-      const cloudResult = await cloudRes.json();
+const cloudResult = await cloudRes.json();
 
-      if (!cloudResult.secure_url) {
-        throw new Error("Cloudinary upload failed");
-      }
+console.log("🔥 CLOUDINARY FULL RESPONSE:", cloudResult);
+
 
       // 🔥 Save in backend
       await axios.post(
