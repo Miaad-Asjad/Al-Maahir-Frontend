@@ -583,7 +583,6 @@ import {
   Folder,
 } from "lucide-react";
 
-/* ================= API URL ================= */
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://al-maahir-backend-production.up.railway.app";
@@ -610,15 +609,16 @@ const AdminResourcesPage = () => {
     loadResources();
   }, []);
 
+  /* ================= LOAD ================= */
   const loadResources = () => {
     axios
       .get(`${API_URL}/api/resources`)
       .then((res) => setResources(res.data))
-      .catch((err) => console.error(err))
+      .catch(console.error)
       .finally(() => setLoading(false));
   };
 
-  
+  /* ================= UPLOAD ================= */
   const uploadResource = async (e) => {
     e.preventDefault();
 
@@ -634,63 +634,32 @@ const AdminResourcesPage = () => {
       setUploading(true);
 
       // 🔥 Cloudinary upload
-      // const cloudData = new FormData();
-      // cloudData.append("file", file);
-      // cloudData.append("upload_preset", "almaahir");
+      const cloudData = new FormData();
+      cloudData.append("file", file);
+      cloudData.append("upload_preset", "test_unsigned_upload");
 
-      // const cloudRes = await fetch(
-      //   "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
-      //   {
-      //     method: "POST",
-      //     body: cloudData,
-      //   }
-      // );
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+        {
+          method: "POST",
+          body: cloudData,
+        }
+      );
 
-      // const cloudResult = await cloudRes.json();
+      const data = await res.json();
+      console.log("🔥 CLOUD:", data);
 
-      // if (!cloudResult.secure_url) {
-      //   throw new Error("Cloudinary upload failed");
-      // }
-
-const uploadResource = async (e) => {
-  e.preventDefault();
-
-  if (!(file instanceof File)) {
-    alert("Select file");
-    return;
-  }
-
-  try {
-    /* ✅ YE LINE ADD KARO (MISSING THI) */
-    const cloudData = new FormData();
-
-    cloudData.append("file", file, file.name);
-    cloudData.append("upload_preset", "test_unsigned_upload");
-
-    const cloudRes = await fetch(
-      "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
-      {
-        method: "POST",
-        body: cloudData,
+      if (!data.secure_url) {
+        throw new Error("Cloudinary upload failed");
       }
-    );
 
-    const cloudResult = await cloudRes.json();
-
-    console.log("🔥 CLOUD RESULT:", cloudResult);
-
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-      // 🔥 Save in backend
+      // 🔥 Save to backend
       await axios.post(
         `${API_URL}/api/resources/upload`,
         {
           title: title || file.name,
           type,
-          url: cloudResult.secure_url,
+          url: data.secure_url,
         },
         {
           headers: {
@@ -760,7 +729,6 @@ const uploadResource = async (e) => {
     }
   };
 
-  /* ================= ICON ================= */
   const typeIcon = (t) => {
     switch (t) {
       case "pdf":
@@ -785,7 +753,6 @@ const uploadResource = async (e) => {
         Resource Manager
       </motion.h1>
 
-      {/* Upload */}
       <div className="max-w-3xl mx-auto bg-white/10 p-6 rounded-xl mb-10">
         {successMsg && <p className="text-green-400">{successMsg}</p>}
         {errorMsg && <p className="text-red-400">{errorMsg}</p>}
@@ -826,7 +793,6 @@ const uploadResource = async (e) => {
         </form>
       </div>
 
-      {/* Resources */}
       <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {resources.map((r) => (
           <div key={r._id} className="bg-white/10 p-4 rounded-lg">
@@ -845,7 +811,6 @@ const uploadResource = async (e) => {
             </div>
 
             <div className="flex gap-3">
-
               {editingId === r._id ? (
                 <>
                   <button onClick={() => saveEdit(r._id)}>
@@ -865,7 +830,6 @@ const uploadResource = async (e) => {
                   </button>
                 </>
               )}
-
             </div>
 
           </div>
