@@ -652,19 +652,37 @@ const AdminResourcesPage = () => {
       //   throw new Error("Cloudinary upload failed");
       // }
 
+const uploadResource = async (e) => {
+  e.preventDefault();
 
-      const cloudRes = await fetch(
-  "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
-  {
-    method: "POST",
-    body: cloudData,
+  if (!(file instanceof File)) {
+    alert("Select file");
+    return;
   }
-);
 
-const cloudResult = await cloudRes.json();
+  try {
+    /* ✅ YE LINE ADD KARO (MISSING THI) */
+    const cloudData = new FormData();
 
-console.log("🔥 CLOUDINARY FULL RESPONSE:", cloudResult);
+    cloudData.append("file", file, file.name);
+    cloudData.append("upload_preset", "test_unsigned_upload");
 
+    const cloudRes = await fetch(
+      "https://api.cloudinary.com/v1_1/dfclbucksk/auto/upload",
+      {
+        method: "POST",
+        body: cloudData,
+      }
+    );
+
+    const cloudResult = await cloudRes.json();
+
+    console.log("🔥 CLOUD RESULT:", cloudResult);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
       // 🔥 Save in backend
       await axios.post(
