@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const CLOUD_NAME = "dfclbucsk";
-const UPLOAD_PRESET = "almaahir_upload";
-
 const EnrollFormPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -25,16 +22,8 @@ const EnrollFormPage = () => {
       setError("");
       setCourse(null);
 
-      if (!navigator.onLine) {
-        setError("Internet connection failed. Please check your network.");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/courses/${slug}`
-        );
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses/${slug}`);
         const c = res.data;
         setCourse(c);
 
@@ -43,7 +32,7 @@ const EnrollFormPage = () => {
           init[f.name] = "";
         });
         setFormValues(init);
-      } catch (err) {
+      } catch {
         setError("Unable to load enrollment form.");
       } finally {
         setLoading(false);
@@ -67,38 +56,39 @@ const EnrollFormPage = () => {
     }
   };
 
-  /* 🔥 CLOUDINARY UPLOAD */
-  const uploadToCloudinary = async (file) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("upload_preset", UPLOAD_PRESET);
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
-      {
-        method: "POST",
-        body: fd,
-      }
-    );
-
-    const data = await res.json();
-
-    if (!data.secure_url) {
-      throw new Error("Cloudinary upload failed");
-    }
-
-    return {
-      url: data.secure_url,
-      public_id: data.public_id,
-    };
-  };
-
+  /* 🔥 FIXED CLOUDINARY LOGIC */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setStatusMsg("");
 
     try {
+      const CLOUD_NAME = "dfclbucsk"; 
+      const UPLOAD_PRESET = "almaahir_upload";
+
+      const uploadToCloudinary = async (file) => {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("upload_preset", UPLOAD_PRESET);
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+          {
+            method: "POST",
+            body: fd,
+          }
+        );
+
+        const data = await res.json();
+
+        if (!data.secure_url) throw new Error("Upload failed");
+
+        return {
+          url: data.secure_url,
+          public_id: data.public_id,
+        };
+      };
+
       /* 🔥 Upload files */
       const uploadedFiles = {};
 
@@ -114,18 +104,15 @@ const EnrollFormPage = () => {
       delete custom.name;
       delete custom.email;
 
-      /* 🔥 Send to backend */
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/enroll`,
-        {
-          course: course._id,
-          courseName: course.title,
-          name: formValues.name || "",
-          email: formValues.email || "",
-          customFields: custom,
-          files: uploadedFiles,
-        }
-      );
+      /* 🔥 API call */
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
+        course: course._id,
+        courseName: course.title,
+        name: formValues.name,
+        email: formValues.email,
+        customFields: custom,
+        files: uploadedFiles,
+      });
 
       setStatusMsg("✅ Enrollment submitted successfully!");
       setTimeout(() => navigate("/"), 2000);
@@ -145,7 +132,7 @@ const EnrollFormPage = () => {
   const fields = course.formFields || [];
 
   return (
-    <div className="pt-[140px] pb-20 px-4 min-h-screen bg-gradient-to-b from-white via-purple-50 to-purple-100">
+    <div className="pt-[140px] pb-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-gradient-to-b from-white via-purple-50 to-purple-100">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
         <h1 className="text-2xl font-bold text-center text-purple-700 mb-6">
           Enroll — {course.title}
@@ -159,8 +146,7 @@ const EnrollFormPage = () => {
             value={formValues.name || ""}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2"
-            placeholder="Name"
+            className="w-full border rounded px-3 py-2 text-black bg-white"
           />
 
           <input
@@ -169,17 +155,13 @@ const EnrollFormPage = () => {
             value={formValues.email || ""}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2"
-            placeholder="Email"
+            className="w-full border rounded px-3 py-2 text-black bg-white"
           />
 
           {fields.map((f) => (
             <div key={f.name}>
               {f.type === "file" ? (
-                <input
-                  type="file"
-                  onChange={(e) => handleChange(e, f)}
-                />
+                <input type="file" onChange={(e) => handleChange(e, f)} />
               ) : (
                 <input
                   type={f.type}
@@ -193,9 +175,8 @@ const EnrollFormPage = () => {
           {statusMsg && <p>{statusMsg}</p>}
 
           <button type="submit" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting ? "Submitting…" : "Submit Enrollment"}
           </button>
-
         </form>
       </div>
     </div>
@@ -203,6 +184,8 @@ const EnrollFormPage = () => {
 };
 
 export default EnrollFormPage;
+
+
 
 // import { useEffect, useState } from "react";
 // import { useParams, useNavigate } from "react-router-dom";
