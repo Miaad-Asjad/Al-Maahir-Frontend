@@ -15,6 +15,7 @@ const EnrollFormPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -53,7 +54,7 @@ const EnrollFormPage = () => {
     fetchCourse();
   }, [slug]);
 
-  /* ✅ FIXED HANDLE CHANGE */
+  /* FIXED HANDLE CHANGE */
   const handleChange = (e, field) => {
     if (field?.type === "file") {
       setFileValues((prev) => ({
@@ -69,86 +70,86 @@ const EnrollFormPage = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-  setStatusMsg("");
+    e.preventDefault();
+    setSubmitting(true);
+    setStatusMsg("");
 
-  if (!navigator.onLine) {
-    setStatusMsg("Internet connection failed. Please try again.");
-    setSubmitting(false);
-    return;
-  }
-
-  try {
-    const CLOUD_NAME = "dfclbucsk"; 
-    const UPLOAD_PRESET = "almaahir_upload";
-
-    /* 🔥 Upload helper */
-    const uploadToCloudinary = async (file) => {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("upload_preset", UPLOAD_PRESET);
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
-        {
-          method: "POST",
-          body: fd,
-        }
-      );
-
-      const data = await res.json();
-
-      if (!data.secure_url) {
-        throw new Error("Cloudinary upload failed");
-      }
-
-      return {
-        url: data.secure_url,
-        public_id: data.public_id,
-      };
-    };
-
-    /* 🔥 STEP 1: Upload all files */
-    const uploadedFiles = {};
-
-    for (const key of Object.keys(fileValues)) {
-      if (fileValues[key]) {
-        const result = await uploadToCloudinary(fileValues[key]);
-        uploadedFiles[key] = result;
-      }
+    if (!navigator.onLine) {
+      setStatusMsg("Internet connection failed. Please try again.");
+      setSubmitting(false);
+      return;
     }
 
-    /* 🔥 STEP 2: Prepare data */
-    const custom = { ...formValues };
-    delete custom.name;
-    delete custom.email;
+    try {
+      const CLOUD_NAME = "dfclbucsk";
+      const UPLOAD_PRESET = "almaahir_upload";
 
-    /* 🔥 STEP 3: Send JSON */
-    await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
-      course: course._id,
-      courseName: course.title,
-      name: formValues.name || "",
-      email: formValues.email || "",
-      customFields: custom,
-      files: uploadedFiles,
-    });
+      /*  Upload helper */
+      const uploadToCloudinary = async (file) => {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("upload_preset", UPLOAD_PRESET);
 
-    setStatusMsg(
-      "✅ Your enrollment request has been submitted successfully. Our team will contact you soon."
-    );
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+          {
+            method: "POST",
+            body: fd,
+          }
+        );
 
-    setTimeout(() => navigate("/"), 2500);
+        const data = await res.json();
 
-  } catch (err) {
-    console.log(err);
-    setStatusMsg(
-      "❌ Unable to submit your enrollment at the moment. Please try again later."
-    );
-  } finally {
-    setSubmitting(false);
-  }
-};
+        if (!data.secure_url) {
+          throw new Error("Cloudinary upload failed");
+        }
+
+        return {
+          url: data.secure_url,
+          public_id: data.public_id,
+        };
+      };
+
+      /*  STEP 1: Upload all files */
+      const uploadedFiles = {};
+
+      for (const key of Object.keys(fileValues)) {
+        if (fileValues[key]) {
+          const result = await uploadToCloudinary(fileValues[key]);
+          uploadedFiles[key] = result;
+        }
+      }
+
+      /*  STEP 2: Prepare data */
+      const custom = { ...formValues };
+      delete custom.name;
+      delete custom.email;
+
+      /*  STEP 3: Send JSON */
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
+        course: course._id,
+        courseName: course.title,
+        name: formValues.name || "",
+        email: formValues.email || "",
+        customFields: custom,
+        files: uploadedFiles,
+      });
+
+      setStatusMsg(
+        "✅ Your enrollment request has been submitted successfully. Our team will contact you soon."
+      );
+
+      setTimeout(() => navigate("/"), 2500);
+
+    } catch (err) {
+      console.log(err);
+      setStatusMsg(
+        "❌ Unable to submit your enrollment at the moment. Please try again later."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading)
     return (
@@ -180,6 +181,22 @@ const EnrollFormPage = () => {
 
   if (!course) return null;
 
+
+  if (!course.isEnrollmentOpen) {
+  return (
+    <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-red-600 mb-2">
+          🚫 Admissions Closed
+        </h2>
+        <p className="text-gray-600">
+          Enrollment for this course is currently closed. Please check back later.
+        </p>
+      </div>
+    </div>
+  );
+}
+
   const fields = course.formFields || [];
 
   return (
@@ -188,6 +205,15 @@ const EnrollFormPage = () => {
         <h1 className="text-2xl font-bold text-center text-purple-700 mb-6">
           Enroll — {course.title}
         </h1>
+
+        <div className="text-center mb-4">
+  <button
+    onClick={() => setShowVideo(true)}
+    className="text-purple-700 underline text-sm font-medium hover:text-purple-900 transition"
+  >
+    📺 Please watch this quick guide before filling the form
+  </button>
+</div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
@@ -231,14 +257,14 @@ const EnrollFormPage = () => {
                 f.type === "email" ||
                 f.type === "number" ||
                 f.type === "tel") && (
-                <input
-                  type={f.type}
-                  value={formValues[f.name] || ""}
-                  onChange={(e) => handleChange(e, f)}
-                  required={f.required}
-                  className="w-full border rounded px-3 py-2 text-black bg-white"
-                />
-              )}
+                  <input
+                    type={f.type}
+                    value={formValues[f.name] || ""}
+                    onChange={(e) => handleChange(e, f)}
+                    required={f.required}
+                    className="w-full border rounded px-3 py-2 text-black bg-white"
+                  />
+                )}
 
               {f.type === "textarea" && (
                 <textarea
@@ -293,6 +319,38 @@ const EnrollFormPage = () => {
             {submitting ? "Submitting…" : "Submit Enrollment"}
           </button>
         </form>
+
+        {showVideo && (
+  <div
+    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4"
+    onClick={() => setShowVideo(false)}
+  >
+    <div
+      className="bg-white p-4 rounded-xl w-full max-w-xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => setShowVideo(false)}
+        className="text-red-500 float-right"
+      >
+        ✖
+      </button>
+
+      <p className="text-sm text-gray-600 mb-2 text-center">
+        Kindly watch this guide once before filling the form.
+      </p>
+
+      <div className="flex justify-center">
+        <video
+          controls
+          className="w-full max-h-[80vh] object-contain rounded-lg"
+        >
+          <source src="YOUR_CLOUDINARY_VIDEO_URL_HERE" />
+        </video>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );
@@ -300,236 +358,3 @@ const EnrollFormPage = () => {
 
 export default EnrollFormPage;
 
-
-// import { useEffect, useState } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import axios from "axios";
-
-// const CLOUD_NAME = "dfclbucsk";
-// const UPLOAD_PRESET = "almaahir_upload";
-
-// const EnrollFormPage = () => {
-//   const { slug } = useParams();
-//   const navigate = useNavigate();
-
-//   const [course, setCourse] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [formValues, setFormValues] = useState({ name: "", email: "" });
-//   const [fileValues, setFileValues] = useState({});
-//   const [submitting, setSubmitting] = useState(false);
-//   const [error, setError] = useState("");
-//   const [statusMsg, setStatusMsg] = useState("");
-
-//   useEffect(() => {
-//     window.scrollTo({ top: 0, behavior: "smooth" });
-
-//     const fetchCourse = async () => {
-//       setLoading(true);
-//       setError("");
-//       setCourse(null);
-
-//       if (!navigator.onLine) {
-//         setError("Internet connection failed. Please check your network.");
-//         setLoading(false);
-//         return;
-//       }
-
-//       try {
-//         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses/${slug}`);
-//         const c = res.data;
-//         setCourse(c);
-
-//         const init = { name: "", email: "" };
-//         (c.formFields || []).forEach((f) => {
-//           init[f.name] = "";
-//         });
-//         setFormValues(init);
-//       } catch (err) {
-//         if (err?.response?.status === 404)
-//           setError("The requested course could not be found.");
-//         else
-//           setError("Unable to load enrollment form. Please try again later.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCourse();
-//   }, [slug]);
-
-//   const handleChange = (e, field) => {
-//     if (field?.type === "file") {
-//       setFileValues((prev) => ({
-//         ...prev,
-//         [field.name]: e.target.files[0],
-//       }));
-//     } else {
-//       setFormValues((prev) => ({
-//         ...prev,
-//         [field ? field.name : e.target.name]: e.target.value,
-//       }));
-//     }
-//   };
-
-//   /* 🔥 CLOUDINARY UPLOAD FUNCTION */
-//   const uploadToCloudinary = async (file) => {
-//     const fd = new FormData();
-//     fd.append("file", file);
-//     fd.append("upload_preset", UPLOAD_PRESET);
-
-//     const res = await fetch(
-//       `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
-//       {
-//         method: "POST",
-//         body: fd,
-//       }
-//     );
-
-//     const data = await res.json();
-
-//     if (!data.secure_url) {
-//       throw new Error("Cloudinary upload failed");
-//     }
-
-//     return {
-//       url: data.secure_url,
-//       public_id: data.public_id,
-//     };
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setSubmitting(true);
-//     setStatusMsg("");
-
-//     if (!navigator.onLine) {
-//       setStatusMsg("Internet connection failed. Please try again.");
-//       setSubmitting(false);
-//       return;
-//     }
-
-//     try {
-//       /* 🔥 STEP 1: Upload files to Cloudinary */
-//       const uploadedFiles = {};
-
-//       for (const key of Object.keys(fileValues)) {
-//         if (fileValues[key]) {
-//           const result = await uploadToCloudinary(fileValues[key]);
-//           uploadedFiles[key] = result;
-//         }
-//       }
-
-//       /* 🔥 STEP 2: Send clean data to backend */
-//       await axios.post(`${import.meta.env.VITE_API_URL}/api/enroll`, {
-//         course: course._id,
-//         courseName: course.title,
-//         name: formValues.name || "",
-//         email: formValues.email || "",
-//         customFields: {
-//           ...formValues,
-//         },
-//         files: uploadedFiles,
-//       });
-
-//       setStatusMsg("✅ Your enrollment request has been submitted successfully. Our team will contact you soon.");
-//       setTimeout(() => navigate("/"), 2500);
-
-//     } catch (err) {
-//       console.log(err);
-//       setStatusMsg("❌ Unable to submit your enrollment at the moment. Please try again later.");
-//     } finally {
-//       setSubmitting(false);
-//     }
-//   };
-
-//   if (loading)
-//     return (
-//       <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white">
-//         <div className="flex flex-col items-center gap-3">
-//           <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-//           <p className="text-gray-600 text-sm">Loading enrollment form…</p>
-//         </div>
-//       </div>
-//     );
-
-//   if (error)
-//     return (
-//       <div className="pt-[140px] min-h-screen flex items-center justify-center bg-white px-4">
-//         <div className="max-w-md text-center">
-//           <h2 className="text-xl font-semibold text-red-600 mb-3">⚠️ Oops!</h2>
-//           <p className="text-gray-700">{error}</p>
-//           <div className="flex justify-center gap-4 mt-6">
-//             <button onClick={() => window.location.reload()} className="px-5 py-2 bg-purple-700 text-white rounded-lg">
-//               Retry
-//             </button>
-//             <button onClick={() => navigate("/courses")} className="px-5 py-2 border border-purple-700 text-purple-700 rounded-lg">
-//               Back to Courses
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     );
-
-//   if (!course) return null;
-
-//   const fields = course.formFields || [];
-
-//   return (
-//     <div className="pt-[140px] pb-20 px-4 min-h-screen bg-gradient-to-b from-white via-purple-50 to-purple-100">
-//       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
-//         <h1 className="text-2xl font-bold text-center text-purple-700 mb-6">
-//           Enroll — {course.title}
-//         </h1>
-
-//         <form onSubmit={handleSubmit} className="space-y-4">
-
-//           <input
-//             type="text"
-//             name="name"
-//             value={formValues.name || ""}
-//             onChange={handleChange}
-//             required
-//             className="w-full border rounded px-3 py-2 text-black"
-//             placeholder="Name"
-//           />
-
-//           <input
-//             type="email"
-//             name="email"
-//             value={formValues.email || ""}
-//             onChange={handleChange}
-//             required
-//             className="w-full border rounded px-3 py-2 text-black"
-//             placeholder="Email"
-//           />
-
-//           {fields.map((f) => (
-//             <div key={f.name}>
-//               {f.type === "file" ? (
-//                 <input
-//                   type="file"
-//                   onChange={(e) => handleChange(e, f)}
-//                 />
-//               ) : (
-//                 <input
-//                   type={f.type}
-//                   value={formValues[f.name] || ""}
-//                   onChange={(e) => handleChange(e, f)}
-//                 />
-//               )}
-//             </div>
-//           ))}
-
-//           {statusMsg && <p className="text-center">{statusMsg}</p>}
-
-//           <button type="submit" disabled={submitting}>
-//             {submitting ? "Submitting..." : "Submit"}
-//           </button>
-
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EnrollFormPage;

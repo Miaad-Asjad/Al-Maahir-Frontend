@@ -9,28 +9,28 @@ const AdminCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  
+
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/courses"); 
+        const res = await axios.get("/api/courses");
         console.log("GET /api/courses response:", res);
         const data = res?.data;
 
-        
+
         if (!data) {
           setCourses([]);
         } else if (Array.isArray(data)) {
           setCourses(data);
         } else if (typeof data === "object") {
-          
+
           if (data._id || data.title || data.slug) {
             setCourses([data]);
           } else if (data.data && Array.isArray(data.data)) {
-            
+
             setCourses(data.data);
           } else {
-            
+
             console.warn("Unexpected /api/courses response shape:", data);
             setCourses([]);
           }
@@ -46,7 +46,7 @@ const AdminCoursesPage = () => {
     })();
   }, []);
 
- 
+
   const duplicateCourse = async (slug) => {
     if (!window.confirm("Create a duplicate of this course?")) return;
     try {
@@ -68,6 +68,22 @@ const AdminCoursesPage = () => {
     } catch (err) {
       console.error(err);
       alert("Failed to delete course.");
+    }
+  };
+
+
+  const toggleEnrollment = async (slug) => {
+    try {
+      const res = await axios.patch(`/api/courses/${slug}/toggle-enrollment`);
+
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.slug === slug ? res.data : c
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update enrollment status.");
     }
   };
 
@@ -119,6 +135,15 @@ const AdminCoursesPage = () => {
                     <Link to={`/admin/courses/edit/${course.slug}`} className="text-green-400 hover:text-green-300">Edit</Link>
                     <button onClick={() => duplicateCourse(course.slug)} className="text-amber-300 hover:text-amber-200">Duplicate</button>
                     <button onClick={() => deleteCourse(course.slug)} className="text-red-400 hover:text-red-300"><Trash2 size={20} /></button>
+                    <button
+                      onClick={() => toggleEnrollment(course.slug)}
+                      className={`px-3 py-1 rounded text-xs font-semibold ${course.isEnrollmentOpen
+                          ? "bg-green-500 text-white"
+                          : "bg-red-500 text-white"
+                        }`}
+                    >
+                      {course.isEnrollmentOpen ? "Open" : "Closed"}
+                    </button>
                   </td>
                 </tr>
               ))}
