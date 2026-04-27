@@ -206,14 +206,14 @@ const EnrollFormPage = () => {
           Enroll — {course.title}
         </h1>
 
-        <div className="text-center mb-4">
+        {/* <div className="text-center mb-4">
   <button
     onClick={() => setShowVideo(true)}
     className="text-purple-700 underline text-sm font-medium hover:text-purple-900 transition"
   >
     📺 Please watch this quick guide before filling the form
   </button>
-</div>
+</div> */}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
