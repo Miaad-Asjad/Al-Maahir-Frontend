@@ -302,8 +302,6 @@
 
 
 
-
-
 import {
   createContext,
   useContext,
@@ -413,7 +411,7 @@ export default function AdminLayout({ children }) {
         enrollments: c.enrollments + 1,
       }));
 
-      /* ✅ UPDATED NOTIFICATION STRUCTURE */
+      /* ✅ UPDATED STRUCTURE (NO BACKEND CHANGE) */
       setNotifications((prev) => [
         {
           id: Date.now(),
@@ -442,7 +440,7 @@ export default function AdminLayout({ children }) {
         {
           id: Date.now(),
           student: data.name,
-          course: "sent a message",
+          course: null,
           time: new Date().toLocaleTimeString(),
         },
         ...prev,
@@ -528,7 +526,7 @@ export default function AdminLayout({ children }) {
                   )}
                 </Link>
 
-                {/*  NOTIFICATION BELL */}
+                {/* 🔔 NOTIFICATION BELL */}
                 <div className="relative">
                   <button onClick={() => setShowDropdown(!showDropdown)}>
                     <Bell size={22} />
@@ -540,7 +538,7 @@ export default function AdminLayout({ children }) {
                     </span>
                   )}
 
-                  {/*  DROPDOWN */}
+                  {/* ✅ UPDATED DROPDOWN ONLY */}
                   {showDropdown && (
                     <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
                       <div className="p-3 border-b font-semibold">
@@ -555,14 +553,16 @@ export default function AdminLayout({ children }) {
                           >
                             <p className="text-sm">
                               <span className="font-semibold text-purple-700">
-                                {n.student}
+                                {n.student || "User"}
                               </span>{" "}
-                              {n.course === "sent a message"
-                                ? n.course
-                                : "enrolled in"}{" "}
-                              <span className="font-bold text-amber-600">
-                                {n.course}
-                              </span>
+                              {n.course
+                                ? "enrolled in"
+                                : "sent a message"}{" "}
+                              {n.course && (
+                                <span className="font-bold text-amber-600">
+                                  {n.course}
+                                </span>
+                              )}
                             </p>
 
                             <p className="text-xs text-gray-500 mt-1">
@@ -578,6 +578,7 @@ export default function AdminLayout({ children }) {
                     </div>
                   )}
                 </div>
+
               </div>
             </div>
           </header>
