@@ -46,7 +46,7 @@ const Navbar = () => {
                 Heart Aligned, Word Divine
               </h2>
               <p className="text-xs text-gray-600 whitespace-nowrap">
-                The People of Quran
+                The People of Qu'ran
               </p>
             </div>
           </div>
