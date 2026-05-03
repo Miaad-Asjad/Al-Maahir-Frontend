@@ -333,31 +333,13 @@ export default function AdminLayout({ children }) {
 
   const [toasts, setToasts] = useState([]);
 
-  /*  NEW STATES */
+  /* 🔥 FIXED STATE */
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const socketRef = useRef(null);
 
-  /* Sound  */
-  const playBeep = () => {
-    try {
-      const ctx = new (window.AudioContext || window.AudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.frequency.value = 900;
-      gain.gain.value = 0.08;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      setTimeout(() => {
-        osc.stop();
-        ctx.close();
-      }, 120);
-    } catch {}
-  };
-
-  /* Toast  */
+  /* Toast */
   const nextId = (() => {
     let i = 1;
     return () => ++i;
@@ -365,7 +347,6 @@ export default function AdminLayout({ children }) {
 
   const pushToast = ({ title, body, type }) => {
     const id = nextId();
-    playBeep();
 
     setToasts((t) => [{ id, title, body, type }, ...t]);
 
@@ -377,7 +358,7 @@ export default function AdminLayout({ children }) {
   const removeToast = (id) =>
     setToasts((t) => t.filter((x) => x.id !== id));
 
-  /*  INITIAL COUNTS- */
+  /* INITIAL COUNTS */
   useEffect(() => {
     Promise.all([
       axios.get("/api/enroll/all").catch(() => ({ data: [] })),
@@ -395,7 +376,7 @@ export default function AdminLayout({ children }) {
     });
   }, []);
 
-  /*  SOCKET  */
+  /* SOCKET */
   useEffect(() => {
     const socket = clientIo(socketUrl, {
       transports: ["websocket"],
@@ -404,17 +385,18 @@ export default function AdminLayout({ children }) {
 
     socketRef.current = socket;
 
-    /*  ENROLLMENT REALTIME */
+    /* ✅ ENROLLMENT */
     socket.on("new-enrollment", (data) => {
       setCounts((c) => ({
         ...c,
         enrollments: c.enrollments + 1,
       }));
 
-      /* ✅ UPDATED STRUCTURE (NO BACKEND CHANGE) */
+      /* 🔥 IMPORTANT FIX */
       setNotifications((prev) => [
         {
           id: Date.now(),
+          type: "enrollment",
           student: data.student,
           course: data.course,
           time: new Date().toLocaleTimeString(),
@@ -429,7 +411,7 @@ export default function AdminLayout({ children }) {
       });
     });
 
-    /*  MESSAGE REALTIME */
+    /* MESSAGE */
     socket.on("new-message", (data) => {
       setCounts((c) => ({
         ...c,
@@ -439,8 +421,8 @@ export default function AdminLayout({ children }) {
       setNotifications((prev) => [
         {
           id: Date.now(),
-          student: data.name,
-          course: null,
+          type: "message",
+          name: data.name,
           time: new Date().toLocaleTimeString(),
         },
         ...prev,
@@ -453,30 +435,7 @@ export default function AdminLayout({ children }) {
       });
     });
 
-    socket.on("enrollment-status-updated", ({ oldStatus, newStatus }) => {
-      if (oldStatus === "pending" && newStatus !== "pending") {
-        setCounts((c) => ({
-          ...c,
-          enrollments: Math.max(c.enrollments - 1, 0),
-        }));
-      }
-    });
-
     return () => socket.disconnect();
-  }, []);
-
-  /* ---------- MESSAGE READ ---------- */
-  useEffect(() => {
-    const handleMessageRead = () => {
-      setCounts((c) => ({
-        ...c,
-        messages: Math.max(c.messages - 1, 0),
-      }));
-    };
-
-    window.addEventListener("message-read", handleMessageRead);
-    return () =>
-      window.removeEventListener("message-read", handleMessageRead);
   }, []);
 
   const ctxValue = { counts, pushToast, removeToast, setCounts };
@@ -488,12 +447,11 @@ export default function AdminLayout({ children }) {
         {/* SIDEBAR */}
         <div
           className={`fixed md:relative top-0 left-0 h-full z-50 transition-all duration-300
-            ${open ? "w-64" : "w-0 md:w-20"}`}
+          ${open ? "w-64" : "w-0 md:w-20"}`}
         >
           <AdminSidebar open={open} setOpen={setOpen} />
         </div>
 
-        {/* MAIN */}
         <div className="flex-1 flex flex-col">
 
           {/* HEADER */}
@@ -513,7 +471,7 @@ export default function AdminLayout({ children }) {
                 </h1>
               </div>
 
-              {/* RIGHT SIDE */}
+              {/* RIGHT */}
               <div className="flex items-center gap-4">
 
                 {/* MESSAGES */}
@@ -526,7 +484,7 @@ export default function AdminLayout({ children }) {
                   )}
                 </Link>
 
-                {/* 🔔 NOTIFICATION BELL */}
+                {/* 🔔 NOTIFICATION */}
                 <div className="relative">
                   <button onClick={() => setShowDropdown(!showDropdown)}>
                     <Bell size={22} />
@@ -538,43 +496,56 @@ export default function AdminLayout({ children }) {
                     </span>
                   )}
 
-                  {/* ✅ UPDATED DROPDOWN ONLY */}
+                  {/* ✅ FINAL DROPDOWN FIX */}
                   {showDropdown && (
                     <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+
                       <div className="p-3 border-b font-semibold">
                         Notifications
                       </div>
 
-                      {notifications.length > 0 ? (
-                        notifications.map((n) => (
-                          <div
-                            key={n.id}
-                            className="px-4 py-3 hover:bg-gray-100 border-b"
-                          >
-                            <p className="text-sm">
-                              <span className="font-semibold text-purple-700">
-                                {n.student || "User"}
-                              </span>{" "}
-                              {n.course
-                                ? "enrolled in"
-                                : "sent a message"}{" "}
-                              {n.course && (
-                                <span className="font-bold text-amber-600">
-                                  {n.course}
-                                </span>
-                              )}
-                            </p>
-
-                            <p className="text-xs text-gray-500 mt-1">
-                              {n.time}
-                            </p>
-                          </div>
-                        ))
-                      ) : (
+                      {notifications.length === 0 ? (
                         <div className="p-3 text-sm text-gray-500">
                           No notifications
                         </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            className="px-4 py-3 border-b hover:bg-gray-100"
+                          >
+                            {n.type === "enrollment" ? (
+                              <>
+                                <p className="text-sm">
+                                  <span className="font-semibold text-purple-700">
+                                    {n.student}
+                                  </span>{" "}
+                                  enrolled in{" "}
+                                  <span className="font-bold text-amber-600">
+                                    {n.course}
+                                  </span>
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {n.time}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-sm">
+                                  New message from{" "}
+                                  <span className="font-semibold text-blue-600">
+                                    {n.name}
+                                  </span>
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {n.time}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        ))
                       )}
+
                     </div>
                   )}
                 </div>
@@ -583,8 +554,7 @@ export default function AdminLayout({ children }) {
             </div>
           </header>
 
-          {/* MAIN CONTENT */}
-          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+          <main className="flex-1 px-4 py-6">
             {children || <Outlet />}
           </main>
         </div>
@@ -600,17 +570,12 @@ export default function AdminLayout({ children }) {
                   : "border-blue-500"
               }`}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between">
                 <div>
                   <div className="font-bold">{t.title}</div>
-                  <div className="text-sm mt-1 text-gray-700">{t.body}</div>
+                  <div className="text-sm mt-1">{t.body}</div>
                 </div>
-                <button
-                  onClick={() => removeToast(t.id)}
-                  className="ml-2 text-xl"
-                >
-                  ×
-                </button>
+                <button onClick={() => removeToast(t.id)}>×</button>
               </div>
             </div>
           ))}
