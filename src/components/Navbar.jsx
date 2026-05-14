@@ -45,7 +45,7 @@ const Navbar = () => {
               {/* <h2 className="text-sm font-bold text-primary leading-tight whitespace-nowrap">
                 Heart Aligned, Word Divine
               </h2> */}
-              <p className="text-xs text-gray-600 whitespace-nowrap">
+              <p className="text-xs text-gray-600 whitespace-nowrap font-bold">
                 The People of Qu'ran
               </p>
             </div>
