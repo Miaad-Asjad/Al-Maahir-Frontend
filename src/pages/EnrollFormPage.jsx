@@ -136,10 +136,10 @@ const EnrollFormPage = () => {
       });
 
       setStatusMsg(
-        "✅ Your enrollment request has been submitted successfully. Our team will contact you soon."
-      );
+  "✅ Your enrollment request has been submitted successfully. A confirmation email will be sent to you shortly. Our team will review your application and contact you soon."
+);
 
-      setTimeout(() => navigate("/"), 2500);
+setTimeout(() => navigate("/"), 5000);
 
     } catch (err) {
       console.log(err);

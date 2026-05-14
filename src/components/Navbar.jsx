@@ -42,9 +42,9 @@ const Navbar = () => {
               className="h-14 w-auto object-contain mr-2"
             />
             <div className="flex flex-col items-start justify-center">
-              <h2 className="text-sm font-bold text-primary leading-tight whitespace-nowrap">
+              {/* <h2 className="text-sm font-bold text-primary leading-tight whitespace-nowrap">
                 Heart Aligned, Word Divine
-              </h2>
+              </h2> */}
               <p className="text-xs text-gray-600 whitespace-nowrap">
                 The People of Qu'ran
               </p>
