@@ -171,6 +171,163 @@ const AdminAddCoursePage = () => {
             />
           </div>
 
+          {/* INTRODUCTION */}
+<div>
+  <label className="block mb-1 text-amber-200">Introduction</label>
+  <textarea
+    name="introduction"
+    value={form.introduction}
+    onChange={handleChange}
+    rows={4}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* DURATION */}
+<div>
+  <label className="block mb-1 text-amber-200">Duration</label>
+  <input
+    name="duration"
+    value={form.duration}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* DAYS */}
+<div>
+  <label className="block mb-1 text-amber-200">Days</label>
+  <input
+    name="days"
+    value={form.days}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* TIME */}
+<div>
+  <label className="block mb-1 text-amber-200">Time</label>
+  <input
+    name="time"
+    value={form.time}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* STARTING DATE */}
+<div>
+  <label className="block mb-1 text-amber-200">Starting Date</label>
+  <input
+    name="startingDate"
+    value={form.startingDate}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* CONTENTS */}
+<div>
+  <label className="block mb-1 text-amber-200">
+    Course Contents (one per line)
+  </label>
+  <textarea
+    name="contents"
+    value={form.contents}
+    onChange={handleChange}
+    rows={5}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* OBJECTIVES */}
+<div>
+  <label className="block mb-1 text-amber-200">
+    Objectives (one per line)
+  </label>
+  <textarea
+    name="objectives"
+    value={form.objectives}
+    onChange={handleChange}
+    rows={5}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* WHO CAN JOIN */}
+<div>
+  <label className="block mb-1 text-amber-200">Who Can Join</label>
+  <textarea
+    name="whoCanJoin"
+    value={form.whoCanJoin}
+    onChange={handleChange}
+    rows={4}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* FEE STRUCTURE */}
+<div>
+  <label className="block mb-1 text-amber-200">
+    Fee Structure (one per line)
+  </label>
+  <textarea
+    name="feeStructure"
+    value={form.feeStructure}
+    onChange={handleChange}
+    rows={4}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* MEDIUM */}
+<div>
+  <label className="block mb-1 text-amber-200">Medium</label>
+  <input
+    name="medium"
+    value={form.medium}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* NOTE */}
+<div>
+  <label className="block mb-1 text-amber-200">Note</label>
+  <textarea
+    name="note"
+    value={form.note}
+    onChange={handleChange}
+    rows={4}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* CONTACT */}
+<div>
+  <label className="block mb-1 text-amber-200">Contact</label>
+  <input
+    name="contact"
+    value={form.contact}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
+{/* WHATSAPP */}
+<div>
+  <label className="block mb-1 text-amber-200">
+    WhatsApp Group Link
+  </label>
+  <input
+    name="whatsappGroupLink"
+    value={form.whatsappGroupLink}
+    onChange={handleChange}
+    className="w-full px-3 py-2 rounded bg-white text-black"
+  />
+</div>
+
           {/*  ENROLLMENT QUESTIONS BUILDER */}
           <hr className="my-6 opacity-30" />
 
